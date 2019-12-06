@@ -49,9 +49,9 @@ void loop()
   {
 
     RxMsg = HWSERIAL.read();
-    Serial.print(RxMsg);
+    // Serial.print(RxMsg);
+    // Serial.print(", ");
     Data[bytecount] = RxMsg;
-    Serial.print(", ");
 
     bytecount++;
     
@@ -82,11 +82,11 @@ void loop()
   // ASSIGN DATA TO VARIABLES //
   //////////////////////////////
 
-  // GLOBAL_X (4-Byte Long Integer)
-  int global_x = p_int[0];
+  // global_x_of (4-Byte Long Integer)
+  int global_x_of = p_int[0];
 
-  // GLOBAL_Y (4-Byte Long Integer)
-  int global_y = p_int[1];
+  // global_y_of (4-Byte Long Integer)
+  int global_y_of = p_int[1];
 
   // x and y window optical flow odometries
   int x_of[25],y_of[25];
@@ -96,15 +96,65 @@ void loop()
 
   // Note: window 0 does not have any information
   for (int w = 0; w < 25; ++w) 
+  { 
+    int *p_w_int = (int*)(Data + w * 20 + 44);
+    short *p_w_short = (short*)(Data + w * 20 + 44);
+    x_of[w] = p_w_int[0];
+    y_of[w] = p_w_int[1];
+    s_dist[w] = p_w_short[4];
+    s_conf[w] = p_w_short[5];
+  }
+
+  Serial.println();
+  Serial.println();
+  Serial.print("global_x_of: ");
+  Serial.print(global_x_of);
+
+  Serial.println();
+  Serial.println();
+  Serial.print("global_y_of: ");
+  Serial.print(global_y_of);
+
+  Serial.println();
+  Serial.println();
+  Serial.print("x_of: ");
+  for (int w = 0; w < 25; ++w) 
   {
-    
-    int *p_wint = (int*)(Data + w * 20 + 44);
-    short *p_wshort = (short*)(Data + w * 20 + 44);
-    x_of[w] = p_wint[0];
-    y_of[w] = p_wshort[1];
-    s_dist[w] = p_wshort[4];
-    s_conf[w] = p_wshort[5];
+    Serial.print(x_of[w]);
+    Serial.print(", ");
 
   }
+
+  Serial.println();
+  Serial.println();
+  Serial.print("y_of: ");
+  for (int w = 0; w < 25; ++w) 
+  { 
+    Serial.print(y_of[w]);
+    Serial.print(", ");
+  }
+
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("s_dist: ");
+  // for (int w = 0; w < 25; ++w) 
+  // { 
+  //   Serial.print(s_dist[w]);
+  //   Serial.print(", ");
+  // }
+  
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("s_conf: ");
+  // for (int w = 0; w < 25; ++w) 
+  // { 
+  //   Serial.print(s_conf[w]);
+  //   Serial.print(", ");
+  // }
+  
+  Serial.println();
+  Serial.println();
+
+
 
 }
