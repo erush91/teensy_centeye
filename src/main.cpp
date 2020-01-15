@@ -1,7 +1,9 @@
+#include <Arduino.h>
+#include <ros.h>
+#include <std_msgs/Float32.h>
 
 //#include <SD.h>
 // #include <SPI.h>
-#include "Wire.h"
 
 // https://www.pjrc.com/teensy/td_uart.html
 // https://forum.pjrc.com/threads/43085-choosing-a-serial-port-on-the-Teensy-3-6
@@ -20,13 +22,31 @@
 // set this to the hardware serial port you wish to use
 #define HWSERIAL Serial1
 
-void setup() 
+//these objects are used to set up a publisher/subscriber ros node
+std_msgs::Float32 temp_msg;
+ros::Publisher pub("temperature", &temp_msg);
+ros::NodeHandle nh;
+
+///////////////
+// RUNS ONCE //
+///////////////
+void setup()
 {
-  Serial.begin(115200);
-  HWSERIAL.begin(115200, SERIAL_8N1);
+    // DO NOT VIEW THE SERIAL MONITOR, if you do, this will cause a ...
+    // Run loop error: Serial Port read failure: device reports readiness to read but returned no data (device disconnected or multiple access on port?
+    Serial.begin(115200);
+    HWSERIAL.begin(115200, SERIAL_8N1);
+    
+    //start the ROS node
+    nh.getHardware()->setBaud(115200);
+    nh.initNode();
+    nh.advertise(pub);
 }
 
-void loop() 
+///////////////////////
+// RUNS CONTINUOUSLY //
+///////////////////////
+void loop()
 {
   // byte TxMsg[6] = {255, 8, 36, 0, 255, 254}; // Retrieve Device ID
   byte TxMsg[6] = {255, 8, 36, 9, 255, 254}; // Retrieve Sensor Data // Dataset 9
@@ -38,34 +58,35 @@ void loop()
 
   HWSERIAL.write(TxMsg, 6);
 
-  Serial.println();
-  Serial.print("NEW DATA");
-  Serial.println();
+  // Serial.println();
+  // Serial.print("NEW DATA");
+  // Serial.println();
 
   // Buffer of UART probably small, this makes sure buffer has some bytes
   delay(1); // Need 3ms delay before reading Device ID (otherwise first byte = 252)
 
   while(HWSERIAL.available() && bytecount < 544)
   {
-
     RxMsg = HWSERIAL.read();
-    // Serial.print(RxMsg);
-    // Serial.print(", ");
+    Serial.print(RxMsg);
+    Serial.print(", ");
     Data[bytecount] = RxMsg;
 
     bytecount++;
     
     // Delay must be short to prevent buffer from overflowing, but long enough for a new byte to come in.
     delayMicroseconds(90);
-  
   }
 
   // Enhance readability in serial monitor
-  delay(1000);
+  delay(10);
 
   Serial.println();
 
-  Serial.clear();
+  // Serial.clear(); 
+  // If Serial.clear() is NOT COMMENTED OUT, CAUSES ROS RUNTIME ERROR:
+  // Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
+  
   HWSERIAL.clear();
 
   /////////////////////////////
@@ -115,24 +136,24 @@ void loop()
   Serial.print("global_y_of: ");
   Serial.print(global_y_of);
 
-  Serial.println();
-  Serial.println();
-  Serial.print("x_of: ");
-  for (int w = 0; w < 25; ++w) 
-  {
-    Serial.print(x_of[w]);
-    Serial.print(", ");
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("x_of: ");
+  // for (int w = 0; w < 25; ++w) 
+  // {
+  //   Serial.print(x_of[w]);
+  //   Serial.print(", ");
 
-  }
+  // }
 
-  Serial.println();
-  Serial.println();
-  Serial.print("y_of: ");
-  for (int w = 0; w < 25; ++w) 
-  { 
-    Serial.print(y_of[w]);
-    Serial.print(", ");
-  }
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("y_of: ");
+  // for (int w = 0; w < 25; ++w) 
+  // { 
+  //   Serial.print(y_of[w]);
+  //   Serial.print(", ");
+  // }
 
   // Serial.println();
   // Serial.println();
@@ -155,6 +176,26 @@ void loop()
   Serial.println();
   Serial.println();
 
+  temp_msg.data = 1.1;
+  
+  pub.publish(&temp_msg);
 
+  nh.spinOnce();
+  delay(1); 
+  
+  // RUN: rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1 _baud:=115200
+  // NEED delay(1) above, else RUNTIME ERROR: Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
