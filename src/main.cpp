@@ -237,7 +237,7 @@ void loop()
   optic_flow_msg.data_length = 50; // THIS LINE IS CRUCIAL! 
                                   // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg.data = (int *)malloc(sizeof(int)*50);
+  optic_flow_msg.data = (int *)malloc(sizeof(int)*50); 
 
   for (int i = 0; i < 25; i++) 
   {
