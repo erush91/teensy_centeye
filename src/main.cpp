@@ -34,6 +34,7 @@ void setup()
 {
     // DO NOT VIEW THE SERIAL MONITOR, if you do, this will cause a ...
     // Run loop error: Serial Port read failure: device reports readiness to read but returned no data (device disconnected or multiple access on port?
+
     Serial.begin(115200);
     HWSERIAL.begin(115200, SERIAL_8N1);
     
@@ -181,8 +182,9 @@ void loop()
   pub.publish(&temp_msg);
 
   nh.spinOnce();
-  delay(1); 
+  delay(1);
   
+  // INSTALL: git clone https://github.com/ros-drivers/rosserial.git
   // RUN: rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1 _baud:=115200
   // NEED delay(1) above, else RUNTIME ERROR: Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
 
