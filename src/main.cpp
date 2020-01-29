@@ -1,6 +1,8 @@
 #include <Arduino.h>
-#include <ros.h>
-#include <std_msgs/Float32.h>
+#include <ros.h> // PlatformIO Library: rosserial_arduino by Open Agriculture Initiative
+// #include <std_msgs/Float32.h>
+#include <std_msgs/Int32.h>
+#include <std_msgs/Int32MultiArray.h>
 
 //#include <SD.h>
 // #include <SPI.h>
@@ -23,8 +25,12 @@
 #define HWSERIAL Serial1
 
 //these objects are used to set up a publisher/subscriber ros node
-std_msgs::Float32 temp_msg;
-ros::Publisher pub("temperature", &temp_msg);
+// std_msgs::Float32 temp_msg;
+// ros::Publisher pub("temperature", &temp_msg);
+
+std_msgs::Int32MultiArray optic_flow_msg;
+ros::Publisher pub_optic_flow("optic_flow", &optic_flow_msg);
+
 ros::NodeHandle nh;
 
 ///////////////
@@ -41,7 +47,8 @@ void setup()
     //start the ROS node
     nh.getHardware()->setBaud(115200);
     nh.initNode();
-    nh.advertise(pub);
+    nh.loginfo("Program info");
+    nh.advertise(pub_optic_flow);
 }
 
 ///////////////////////
@@ -69,8 +76,8 @@ void loop()
   while(HWSERIAL.available() && bytecount < 544)
   {
     RxMsg = HWSERIAL.read();
-    Serial.print(RxMsg);
-    Serial.print(", ");
+    // Serial.print(RxMsg);
+    // Serial.print(", ");
     Data[bytecount] = RxMsg;
 
     bytecount++;
@@ -127,6 +134,51 @@ void loop()
     s_conf[w] = p_w_short[5];
   }
 
+  int optic_flow_x[25];
+  int optic_flow_x_acc[25];
+  int optic_flow_x_acc_last[25];
+  int optic_flow_y[25];
+  int optic_flow_y_acc[25];
+  int optic_flow_y_acc_last[25];
+
+  for( int i = 0; i < sizeof(x_of)/sizeof(x_of[0]); i++)
+  {
+    optic_flow_x_acc[i] = x_of[i];
+    optic_flow_x[i] = optic_flow_x_acc[i] - optic_flow_x_acc_last[i];
+    optic_flow_x_acc_last[i] = optic_flow_x_acc[i]; 
+  }
+
+  for( int i = 0; i < sizeof(y_of)/sizeof(y_of[0]); i++)
+  {
+    optic_flow_y_acc[i] = y_of[i];
+    optic_flow_y[i] = optic_flow_y_acc[i] - optic_flow_y_acc_last[i];
+    optic_flow_y_acc_last[i] = optic_flow_y_acc[i];
+  }
+
+
+  Serial.println();
+  Serial.println();
+
+  Serial.print("optic_flow_x: ");
+  for (int w = 0; w < 25; ++w) 
+  {
+    Serial.print(optic_flow_x[w]);
+    Serial.print(", ");
+
+  }
+  
+  Serial.println();
+  Serial.println();
+
+  Serial.print("optic_flow_y: ");
+  for (int w = 0; w < 25; ++w) 
+  {
+    Serial.print(optic_flow_y[w]);
+    Serial.print(", ");
+
+  }
+
+
   Serial.println();
   Serial.println();
   Serial.print("global_x_of: ");
@@ -137,24 +189,24 @@ void loop()
   Serial.print("global_y_of: ");
   Serial.print(global_y_of);
 
-  // Serial.println();
-  // Serial.println();
-  // Serial.print("x_of: ");
-  // for (int w = 0; w < 25; ++w) 
-  // {
-  //   Serial.print(x_of[w]);
-  //   Serial.print(", ");
+  Serial.println();
+  Serial.println();
+  Serial.print("x_of: ");
+  for (int w = 0; w < 25; ++w) 
+  {
+    Serial.print(x_of[w]);
+    Serial.print(", ");
 
-  // }
+  }
 
-  // Serial.println();
-  // Serial.println();
-  // Serial.print("y_of: ");
-  // for (int w = 0; w < 25; ++w) 
-  // { 
-  //   Serial.print(y_of[w]);
-  //   Serial.print(", ");
-  // }
+  Serial.println();
+  Serial.println();
+  Serial.print("y_of: ");
+  for (int w = 0; w < 25; ++w) 
+  { 
+    Serial.print(y_of[w]);
+    Serial.print(", ");
+  }
 
   // Serial.println();
   // Serial.println();
@@ -177,15 +229,40 @@ void loop()
   Serial.println();
   Serial.println();
 
-  temp_msg.data = 1.1;
-  
-  pub.publish(&temp_msg);
+  optic_flow_msg.layout.dim = (std_msgs::MultiArrayDimension *)
+  malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
+  optic_flow_msg.layout.dim[0].label = "length";
+  optic_flow_msg.layout.dim[0].size = 50;
+  optic_flow_msg.layout.dim[0].stride = 50;
+  optic_flow_msg.layout.data_offset = 0;
+  optic_flow_msg.data_length = 50; // THIS LINE IS CRUCIAL! https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
+  optic_flow_msg.data = (int *)malloc(sizeof(int)*50);
+
+  // optic_flow_msg.data[0] = optic_flow_x[0];
+  // optic_flow_msg.data[1] = 5;
+  // optic_flow_msg.data[2] = 5;
+  // optic_flow_msg.data[3] = 5;
+  // optic_flow_msg.data[4] = 5;
+  // optic_flow_msg.data[5] = 5;
+  // optic_flow_msg.data[6] = 5;
+
+  for (int i = 0; i < 25; i++) 
+  {
+    optic_flow_msg.data[i] = optic_flow_x[i];
+  }
+  for (int i = 0; i < 25; i++) 
+  {
+    optic_flow_msg.data[25+i] = optic_flow_y[i];
+  }
+
+  pub_optic_flow.publish(&optic_flow_msg);
 
   nh.spinOnce();
   delay(1);
   
   // INSTALL: git clone https://github.com/ros-drivers/rosserial.git
-  // RUN: rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1 _baud:=115200
+  // RUN: rosrun rosserial_arduino serial_node.py _port:=/dev/ttyACM1 _baud:=115200
+  // NOTE CANNOT VIEW SERIAL MONITOR AND CONNECT TO ROSSERIAL SIMULTANEOUSLY
   // NEED delay(1) above, else RUNTIME ERROR: Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
 
 }
