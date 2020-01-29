@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <ros.h> // PlatformIO Library: rosserial_arduino by Open Agriculture Initiative
-// #include <std_msgs/Float32.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Int32MultiArray.h>
 
@@ -47,7 +46,7 @@ void setup()
     //start the ROS node
     nh.getHardware()->setBaud(115200);
     nh.initNode();
-    nh.loginfo("Program info");
+    // nh.loginfo("Program info");
     nh.advertise(pub_optic_flow);
 }
 
@@ -56,6 +55,7 @@ void setup()
 ///////////////////////
 void loop()
 {
+
   // byte TxMsg[6] = {255, 8, 36, 0, 255, 254}; // Retrieve Device ID
   byte TxMsg[6] = {255, 8, 36, 9, 255, 254}; // Retrieve Sensor Data // Dataset 9
   // byte TxMsg[6] = {255, 8, 36, 3, 255, 254}; // Retrieve Sensor Data // Dataset 3
@@ -89,7 +89,7 @@ void loop()
   // Enhance readability in serial monitor
   delay(10);
 
-  Serial.println();
+  // Serial.println();
 
   // Serial.clear(); 
   // If Serial.clear() is NOT COMMENTED OUT, CAUSES ROS RUNTIME ERROR:
@@ -156,57 +156,57 @@ void loop()
   }
 
 
-  Serial.println();
-  Serial.println();
+  // Serial.println();
+  // Serial.println();
 
-  Serial.print("optic_flow_x: ");
-  for (int w = 0; w < 25; ++w) 
-  {
-    Serial.print(optic_flow_x[w]);
-    Serial.print(", ");
+  // Serial.print("optic_flow_x: ");
+  // for (int w = 0; w < 25; ++w) 
+  // {
+  //   Serial.print(optic_flow_x[w]);
+  //   Serial.print(", ");
 
-  }
+  // }
   
-  Serial.println();
-  Serial.println();
+  // Serial.println();
+  // Serial.println();
 
-  Serial.print("optic_flow_y: ");
-  for (int w = 0; w < 25; ++w) 
-  {
-    Serial.print(optic_flow_y[w]);
-    Serial.print(", ");
+  // Serial.print("optic_flow_y: ");
+  // for (int w = 0; w < 25; ++w) 
+  // {
+  //   Serial.print(optic_flow_y[w]);
+  //   Serial.print(", ");
 
-  }
+  // }
 
 
-  Serial.println();
-  Serial.println();
-  Serial.print("global_x_of: ");
-  Serial.print(global_x_of);
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("global_x_of: ");
+  // Serial.print(global_x_of);
 
-  Serial.println();
-  Serial.println();
-  Serial.print("global_y_of: ");
-  Serial.print(global_y_of);
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("global_y_of: ");
+  // Serial.print(global_y_of);
 
-  Serial.println();
-  Serial.println();
-  Serial.print("x_of: ");
-  for (int w = 0; w < 25; ++w) 
-  {
-    Serial.print(x_of[w]);
-    Serial.print(", ");
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("x_of: ");
+  // for (int w = 0; w < 25; ++w) 
+  // {
+  //   Serial.print(x_of[w]);
+  //   Serial.print(", ");
 
-  }
+  // }
 
-  Serial.println();
-  Serial.println();
-  Serial.print("y_of: ");
-  for (int w = 0; w < 25; ++w) 
-  { 
-    Serial.print(y_of[w]);
-    Serial.print(", ");
-  }
+  // Serial.println();
+  // Serial.println();
+  // Serial.print("y_of: ");
+  // for (int w = 0; w < 25; ++w) 
+  // { 
+  //   Serial.print(y_of[w]);
+  //   Serial.print(", ");
+  // }
 
   // Serial.println();
   // Serial.println();
@@ -226,8 +226,8 @@ void loop()
   //   Serial.print(", ");
   // }
   
-  Serial.println();
-  Serial.println();
+  // Serial.println();
+  // Serial.println();
 
   optic_flow_msg.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
@@ -235,25 +235,19 @@ void loop()
   optic_flow_msg.layout.dim[0].size = 50;
   optic_flow_msg.layout.dim[0].stride = 50;
   optic_flow_msg.layout.data_offset = 0;
-  optic_flow_msg.data_length = 50; // THIS LINE IS CRUCIAL! https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
+  optic_flow_msg.data_length = 50; // THIS LINE IS CRUCIAL! 
+                                  // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
+                                  // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
   optic_flow_msg.data = (int *)malloc(sizeof(int)*50);
 
-  // optic_flow_msg.data[0] = optic_flow_x[0];
-  // optic_flow_msg.data[1] = 5;
-  // optic_flow_msg.data[2] = 5;
-  // optic_flow_msg.data[3] = 5;
-  // optic_flow_msg.data[4] = 5;
-  // optic_flow_msg.data[5] = 5;
-  // optic_flow_msg.data[6] = 5;
-
-  for (int i = 0; i < 25; i++) 
+  for (int i = 0; i < 28; i++) 
   {
     optic_flow_msg.data[i] = optic_flow_x[i];
   }
-  for (int i = 0; i < 25; i++) 
-  {
-    optic_flow_msg.data[25+i] = optic_flow_y[i];
-  }
+  // for (int i = 0; i < 25; i++) 
+  // {
+  //   optic_flow_msg.data[25+i] = optic_flow_y[i];
+  // }
 
   pub_optic_flow.publish(&optic_flow_msg);
 
@@ -264,6 +258,44 @@ void loop()
   // RUN: rosrun rosserial_arduino serial_node.py _port:=/dev/ttyACM1 _baud:=115200
   // NOTE CANNOT VIEW SERIAL MONITOR AND CONNECT TO ROSSERIAL SIMULTANEOUSLY
   // NEED delay(1) above, else RUNTIME ERROR: Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
+
+  // FIXED the data pointer issues
+  // https://answers.ros.org/question/285670/rosserial-multi-array-issue/
+  // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
+
+
+  // STOPS PUBLISHING AFTER 44 seconds (array of 7), 23 seconds (14), 12 seconds (28), and 6 seconds (50).
+  // Not sure why, but I think the buffer is overflowing or something, the time it does is inversely proportional to the length of the array
+  // https://github.com/ros-drivers/rosserial/issues/271
+  
+  // https://answers.ros.org/question/173564/rosserial-arduino-serial-port-read-failure/
+  // Commented out Serial.print statement
+
+  // https://answers.ros.org/question/11022/rosserial_arduino-trouble-with-too-much-messaging/
+  // Increasing the baud rate to 230400 in the (rosserial run parameter and the C code) did not help
+  // Increasing the publish buffer size also did not help (~/.platformio/ros.h and ~/.platformio/ros/node_handle.h)
+
+  // https://github.com/ros-drivers/rosserial/issues/271
+  // Maybe should try more powerful microcontroller
+
+  // https://answers.ros.org/question/215687/rosserial-arduino-connectivity-problem/
+  // Tried commenting out logging, nh.loginfo("Program info");
+
+  // https://answers.ros.org/question/208079/rosserial-arduino-custom-message-message-larger-than-buffer/
+  // https://answers.ros.org/question/28890/using-rosserial-for-a-atmega168arduino-based-motorcontroller/
+  // http://wiki.ros.org/rosserial_arduino/Tutorials/NodeHandle%20and%20ArduinoHardware
+  // https://answers.ros.org/question/73627/how-to-increase-rosserial-buffer-size/
+  // Tried increasing the default publisher buffer
+
+  // Tried clearing / flushing the buffer
+  // https://forum.arduino.cc/index.php?topic=234151.0
+  // https://forum.arduino.cc/index.php?topic=252001.0
+
+  // https://github.com/ros-drivers/rosserial/issues/351
+  // https://github.com/chrisspen/rosserial
+  // Tried different rosserial package
+
+
 
 }
 
