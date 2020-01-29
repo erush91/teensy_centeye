@@ -196,7 +196,6 @@ void loop()
   // {
   //   Serial.print(x_of[w]);
   //   Serial.print(", ");
-
   // }
 
   // Serial.println();
@@ -240,14 +239,14 @@ void loop()
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
   optic_flow_msg.data = (int *)malloc(sizeof(int)*50);
 
-  for (int i = 0; i < 28; i++) 
+  for (int i = 0; i < 25; i++) 
   {
     optic_flow_msg.data[i] = optic_flow_x[i];
   }
-  // for (int i = 0; i < 25; i++) 
-  // {
-  //   optic_flow_msg.data[25+i] = optic_flow_y[i];
-  // }
+  for (int i = 0; i < 25; i++) 
+  {
+    optic_flow_msg.data[25+i] = optic_flow_y[i];
+  }
 
   pub_optic_flow.publish(&optic_flow_msg);
 
