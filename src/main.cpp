@@ -155,7 +155,6 @@ void loop()
     optic_flow_y_acc_last[i] = optic_flow_y_acc[i];
   }
 
-
   // Serial.println();
   // Serial.println();
 
@@ -237,7 +236,7 @@ void loop()
   optic_flow_msg.data_length = 50; // THIS LINE IS CRUCIAL! 
                                   // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg.data = (int *)malloc(sizeof(int)*50); 
+  optic_flow_msg.data = (long int *)malloc(sizeof(int)*50); 
 
   for (int i = 0; i < 25; i++) 
   {
@@ -250,7 +249,11 @@ void loop()
 
   pub_optic_flow.publish(&optic_flow_msg);
 
+  free(optic_flow_msg.data);
+  free(optic_flow_msg.layout.dim);
+
   nh.spinOnce();
+
   delay(1);
   
   // INSTALL: git clone https://github.com/ros-drivers/rosserial.git
