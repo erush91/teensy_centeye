@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>optic_vis</name>
+	<name>ub_optic_flow</name>
   <version>0.0.0</version>
   <description>The optic_vis package</description>
 
