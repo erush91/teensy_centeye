@@ -57,12 +57,17 @@ void loop()
 {
 
   // byte TxMsg[6] = {255, 8, 36, 0, 255, 254}; // Retrieve Device ID
-  byte TxMsg[6] = {255, 8, 36, 9, 255, 254}; // Retrieve Sensor Data // Dataset 9
+  // byte TxMsg[6] = {255, 8, 36, 9, 255, 254}; // Retrieve Sensor Data // Dataset 11 (for V1 sensor - Classic OF Sensor)
+  byte TxMsg[6] = {255, 8, 36, 11, 255, 254}; // Retrieve Sensor Data // Dataset 11 (for V2 sensor - HT Sensor)
   // byte TxMsg[6] = {255, 8, 36, 3, 255, 254}; // Retrieve Sensor Data // Dataset 3
+  
+  // 255, 1,36, CMD, Arg 0, Arg 1, ..., Arg N-1, 255, 254 // Send Generic Command
+  // 255, 1,36, 46, Arg 0, Arg 1, Arg 2, Arg 3, 255, 254 // Change HT Command
+  // Arg 0 - 3 are four bytes that comprise of a single parameter, wait 1/10s between changinh parameters
 
   int RxMsg;
   unsigned int bytecount = 0;
-  unsigned char Data[544];
+  unsigned char Data[246];
 
   HWSERIAL.write(TxMsg, 6);
 
@@ -73,7 +78,7 @@ void loop()
   // Buffer of UART probably small, this makes sure buffer has some bytes
   delay(1); // Need 3ms delay before reading Device ID (otherwise first byte = 252)
 
-  while(HWSERIAL.available() && bytecount < 544)
+  while(HWSERIAL.available() && bytecount < 246)
   {
     RxMsg = HWSERIAL.read();
     // Serial.print(RxMsg);
@@ -111,49 +116,62 @@ void loop()
   // ASSIGN DATA TO VARIABLES //
   //////////////////////////////
 
-  // global_x_of (4-Byte Long Integer)
-  int global_x_of = p_int[0];
+  signed char CapQX[121], CapQY[121];
 
-  // global_y_of (4-Byte Long Integer)
-  int global_y_of = p_int[1];
+  int frame_counter = p_int[0];
 
-  // x and y window optical flow odometries
-  int x_of[25],y_of[25];
-
-  // stereo distance and confidence flags for windows
-  short s_dist[25],s_conf[25];
-
-  // Note: window 0 does not have any information
-  for (int w = 0; w < 25; ++w) 
-  { 
-    int *p_w_int = (int*)(Data + w * 20 + 44);
-    short *p_w_short = (short*)(Data + w * 20 + 44);
-    x_of[w] = p_w_int[0];
-    y_of[w] = p_w_int[1];
-    s_dist[w] = p_w_short[4];
-    s_conf[w] = p_w_short[5];
-  }
-
-  int optic_flow_x[25];
-  int optic_flow_x_acc[25];
-  int optic_flow_x_acc_last[25];
-  int optic_flow_y[25];
-  int optic_flow_y_acc[25];
-  int optic_flow_y_acc_last[25];
-
-  for( int i = 0; i < sizeof(x_of)/sizeof(x_of[0]); i++)
+  // Window 0 = Global
+  // Window 1 - 24 = Classic V1
+  // Window 25 - 120 = Small
+  for(int i = 0; i < 121; i++)
   {
-    optic_flow_x_acc[i] = x_of[i];
-    optic_flow_x[i] = optic_flow_x_acc[i] - optic_flow_x_acc_last[i];
-    optic_flow_x_acc_last[i] = optic_flow_x_acc[i]; 
+    CapQX[i] = Data[4+2*i];
+    CapQY[i] = Data[5+2*i];
   }
 
-  for( int i = 0; i < sizeof(y_of)/sizeof(y_of[0]); i++)
-  {
-    optic_flow_y_acc[i] = y_of[i];
-    optic_flow_y[i] = optic_flow_y_acc[i] - optic_flow_y_acc_last[i];
-    optic_flow_y_acc_last[i] = optic_flow_y_acc[i];
-  }
+  // // global_x_of (4-Byte Long Integer)
+  // int global_x_of = p_int[0];
+
+  // // global_y_of (4-Byte Long Integer)
+  // int global_y_of = p_int[1];
+
+  // // x and y window optical flow odometries
+  // int x_of[25],y_of[25];
+
+  // // stereo distance and confidence flags for windows
+  // short s_dist[25],s_conf[25];
+
+  // // Note: window 0 does not have any information
+  // for (int w = 0; w < 25; ++w) 
+  // { 
+  //   int *p_w_int = (int*)(Data + w * 20 + 44);
+  //   short *p_w_short = (short*)(Data + w * 20 + 44);
+  //   x_of[w] = p_w_int[0];
+  //   y_of[w] = p_w_int[1];
+  //   s_dist[w] = p_w_short[4];
+  //   s_conf[w] = p_w_short[5];
+  // }
+
+  // int optic_flow_x[25];
+  // int optic_flow_x_acc[25];
+  // int optic_flow_x_acc_last[25];
+  // int optic_flow_y[25];
+  // int optic_flow_y_acc[25];
+  // int optic_flow_y_acc_last[25];
+
+  // for( int i = 0; i < sizeof(x_of)/sizeof(x_of[0]); i++)
+  // {
+  //   optic_flow_x_acc[i] = x_of[i];
+  //   optic_flow_x[i] = optic_flow_x_acc[i] - optic_flow_x_acc_last[i];
+  //   optic_flow_x_acc_last[i] = optic_flow_x_acc[i]; 
+  // }
+
+  // for( int i = 0; i < sizeof(y_of)/sizeof(y_of[0]); i++)
+  // {
+  //   optic_flow_y_acc[i] = y_of[i];
+  //   optic_flow_y[i] = optic_flow_y_acc[i] - optic_flow_y_acc_last[i];
+  //   optic_flow_y_acc_last[i] = optic_flow_y_acc[i];
+  // }
 
   // Serial.println();
   // Serial.println();
