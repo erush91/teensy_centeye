@@ -21,6 +21,8 @@
 // Serial1: RX1 / TX1
 
 // set this to the hardware serial port you wish to use
+// IMPORTANT be sure  to edit the SERIAL_RX_BUFFER_SIZE to 2048 in the files Serial1.c, Serial2.c, Serial3.c ...... Serial5.c files 
+// location of serial.c files arduino-1.8.8/hardware/teensy/avr/cores/teensy3 ( check for your computer)
 #define HWSERIAL Serial4
 #define SESERIAL Serial2
 #define THSERIAL Serial3
@@ -234,7 +236,7 @@ void loop()
   }
 
 
-
+  //FRONT
   optic_flow_msg.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
   optic_flow_msg.layout.dim[0].label = "length";
@@ -261,6 +263,7 @@ void loop()
   free(optic_flow_msg.layout.dim);
 
 
+  //RIGHT
   optic_flow_msg1.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
   optic_flow_msg1.layout.dim[0].label = "length1";
@@ -279,15 +282,17 @@ void loop()
   for (int i = 0; i < 121; i++) 
   {
     optic_flow_msg1.data[121+i] = CapQY1[i];
-  }
+  }p
 
   pub_optic_flow1.publish(&optic_flow_msg1);
 
   free(optic_flow_msg1.data);
   free(optic_flow_msg1.layout.dim);
 
+  
 
- optic_flow_msg2.layout.dim = (std_msgs::MultiArrayDimension *)
+  //LEFT
+  optic_flow_msg2.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
   optic_flow_msg2.layout.dim[0].label = "length2";
   optic_flow_msg2.layout.dim[0].size = 242;
@@ -312,9 +317,12 @@ void loop()
   free(optic_flow_msg2.data);
   free(optic_flow_msg2.layout.dim);
 
+  
+  
+  //BACK
   optic_flow_msg3.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
-  optic_flow_msg3.layout.dim[0].label = "length2";
+  optic_flow_msg3.layout.dim[0].label = "length3";
   optic_flow_msg3.layout.dim[0].size = 242;
   optic_flow_msg3.layout.dim[0].stride = 242;
   optic_flow_msg3.layout.data_offset = 0;
@@ -382,7 +390,4 @@ void loop()
   // https://github.com/ros-drivers/rosserial/issues/351
   // https://github.com/chrisspen/rosserial
   // Tried different rosserial package
-
-
-
 }
