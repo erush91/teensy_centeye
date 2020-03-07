@@ -1,0 +1,26 @@
+<launch>
+	<node name="nh" pkg="hottridge_vis" type="hottridge_vis" args="--test" respawn="true">
+		<remap from="optic_flow" to="optic_flow_front" />
+		<remap from="optic_markers"      to="optic_markers0"  />
+	</node>
+
+
+	<node name="nh1" pkg="hottridge_vis" type="hottridge_vis" args="--test" respawn="true">
+		<remap from="optic_flow" to="optic_flow_right" />
+		<remap from="optic_markers"      to="optic_markers1"  />
+	</node>
+
+	<node name="nh2" pkg="hottridge_vis" type="hottridge_vis" args="--test" respawn="true">
+		<remap from="optic_flow" to="optic_flow_left" />
+		<remap from="optic_markers"      to="optic_markers2"  />
+	</node>
+
+	<node name="nh3" pkg="hottridge_vis" type="hottridge_vis" args="--test" respawn="true" >
+		<remap from="optic_flow" to="optic_flow_back" />
+		<remap from="optic_markers"      to="optic_markers3"  />
+	</node>
+
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find hottridge_vis)/rviz/visualizer.rviz"/>
+
+	<!--  -->
+</launch>
