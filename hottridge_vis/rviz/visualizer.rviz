@@ -57,10 +57,10 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /optic_markers
+      Marker Topic: /optic_markers_front
       Name: MarkerArray
       Namespaces:
-        {}
+        Arrows: true
       Queue Size: 100
       Value: true
     - Class: rviz/Axes
@@ -116,7 +116,7 @@ Visualization Manager:
       Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.706758499145508
+      Yaw: 4.70175838470459
     Saved: ~
 Window Geometry:
   Displays:
