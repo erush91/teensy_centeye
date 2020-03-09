@@ -3,6 +3,9 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Int32MultiArray.h>
 
+//IMPORTANT
+//While using rosserial make sure to change the value of buffer size in the ros.h(ros_lib folder).
+
 //#include <SD.h>
 // #include <SPI.h>
 
