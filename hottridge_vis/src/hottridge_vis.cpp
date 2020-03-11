@@ -348,11 +348,11 @@ void callback(const std_msgs::Int32MultiArray::ConstPtr & msg)
 	        of_y = of_y * 10 / mag;
 	}
 
-        q.x = HAdegree[k];
-        q.y = VAdegree[k];
+        q.x = - HAdegree[k];
+        q.y = - VAdegree[k];
         q.z = 0.0;
-        p.x = HAdegree[k] + of_x;
-        p.y = VAdegree[k] + of_y;
+        p.x = - HAdegree[k] + of_x;
+        p.y = - VAdegree[k] + of_y;
         p.z = 0.0;
 
 	ma.points.push_back(q);

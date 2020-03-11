@@ -57,12 +57,13 @@ void loop()
 {
 
   // byte TxMsg[6] = {255, 8, 36, 0, 255, 254}; // Retrieve Device ID
-  byte TxMsg[6] = {255, 8, 36, 9, 255, 254}; // Retrieve Sensor Data // Dataset 9
+  //byte TxMsg[6] = {255, 8, 36, 9, 255, 254}; // Retrieve Sensor Data // Dataset 9
+  byte TxMsg[6] = {255, 8, 36, 11, 255, 254}; // Retrieve Sensor Data // Dataset 11
   // byte TxMsg[6] = {255, 8, 36, 3, 255, 254}; // Retrieve Sensor Data // Dataset 3
 
   int RxMsg;
   unsigned int bytecount = 0;
-  unsigned char Data[544];
+  unsigned char Data[100];
 
   HWSERIAL.write(TxMsg, 6);
 
@@ -73,7 +74,7 @@ void loop()
   // Buffer of UART probably small, this makes sure buffer has some bytes
   delay(1); // Need 3ms delay before reading Device ID (otherwise first byte = 252)
 
-  while(HWSERIAL.available() && bytecount < 544)
+  while(HWSERIAL.available() && bytecount < 100)
   {
     RxMsg = HWSERIAL.read();
     // Serial.print(RxMsg);
@@ -240,7 +241,7 @@ void loop()
 
   for (int i = 0; i < 25; i++) 
   {
-    optic_flow_msg.data[i] = optic_flow_x[i];
+    optic_flow_msg.data[i] = - optic_flow_x[i];
   }
   for (int i = 0; i < 25; i++) 
   {
@@ -297,18 +298,4 @@ void loop()
   // https://github.com/chrisspen/rosserial
   // Tried different rosserial package
 
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
