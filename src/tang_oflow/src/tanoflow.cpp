@@ -19,7 +19,7 @@
 
 class TanOflow
 {
-	ROS_INFO(" START ");
+	
 public:
 
 	float HA_plot[96] = {0,
