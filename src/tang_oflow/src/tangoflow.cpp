@@ -172,7 +172,7 @@ ros::Publisher alltan_pub;
 int main(int argc, char **argv) 
 	{
 
-	ros::init(argc, argv, "tang_flow");
+	ros::init(argc, argv, "tangoflow");
 	ros::NodeHandle n;
 	
 	ROS_INFO(" 1 ");
