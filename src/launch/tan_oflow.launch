@@ -1,0 +1,10 @@
+<launch>
+
+  <node name="tanoflow" type="tanoflow" pkg="tang_oflow" output="screen">
+  </node>
+  <node name="controller" type="controller" pkg="tang_oflow" output="screen">
+  </node>
+  <node name="scan_plot" type="opticflow.py" pkg="optic_visualiser" output="screen">
+  </node>
+
+</launch>
