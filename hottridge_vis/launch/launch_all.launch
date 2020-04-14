@@ -1,0 +1,53 @@
+<launch>
+
+
+  <!-- Parameters for Optic Flow Sensors (rosserial) -->
+  <arg name="port_name" default="/dev/ttyACM2"/>
+  <arg name="baud_rate" default="115200"/>
+
+  <!-- Launch Optic Flow Sensors (rosserial) -->
+  <node pkg="rosserial_arduino" type="serial_node.py" name="rosserial_arduino" output="screen" args="_port:=$(arg port_name) _baud:=$(arg baud_rate)"/>
+
+  <!-- Launch Optic Flow Visualizer -->
+  <include file="$(find hottridge_vis)/launch/visual.launch"/>
+
+  <!-- Launch Radar -->
+  <include file="$(find goggles)/launch/goggles.launch"/>
+
+  <!-- Launch RPLIDAR S1 -->
+  <include file="$(find rplidar_ros)/launch/rplidar_s1.launch"/>
+
+  <!-- Launch IMU Madgwick Filter -->
+  <include file="$(find imu_filter_madgwick)/launch/imu.launch"/>
+
+  <!-- Record Data -->
+
+  <!-- Robot namespacing (if necessary) -->
+  <arg name="ns" default=""/>
+
+  <!-- SSD Location -->:
+  <arg name="folder_location" default="/home/$(env USER)/centeye_data"/>
+
+  <!-- Recording Split Parameters -->
+  <arg name="split_time" default="60m"/>
+  <arg name="split_number" default="0"/>
+
+    <node pkg="rosbag" type="record" name="rosbag_record_uav" output="screen"
+      args=" --split --duration=$(arg split_time) --max-splits $(arg split_number) --buffsize 0 --output-prefix $(arg folder_location)/$(arg ns)
+	/tf
+      	/tf_static
+      	$(arg ns)/cmd_drive
+      	$(arg ns)/cmd_vel
+      	$(arg ns)/imu/data
+      	$(arg ns)/mmWaveDataHdl/RScan
+      	$(arg ns)/mmWaveDataHdl/velocity
+      	$(arg ns)/scan
+        $(arg ns)/optic_flow_front
+        $(arg ns)/optic_flow_back
+        $(arg ns)/optic_flow_right
+        $(arg ns)/optic_flow_left
+
+      ">
+    </node>
+
+</launch>

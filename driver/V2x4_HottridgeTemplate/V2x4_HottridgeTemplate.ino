@@ -26,26 +26,22 @@
 // set this to the hardware serial port you wish to use
 // IMPORTANT be sure  to edit the SERIAL_RX_BUFFER_SIZE to 2048 in the files Serial1.c, Serial2.c, Serial3.c ...... Serial5.c files 
 // location of serial.c files arduino-1.8.8/hardware/teensy/avr/cores/teensy3 ( check for your computer)
-#define HWSERIAL Serial4
-#define SESERIAL Serial2
-#define THSERIAL Serial3
-#define FOSERIAL Serial1
 
 //these objects are used to set up a publisher/subscriber ros node
 // std_msgs::Float32 temp_msg;
 // ros::Publisher pub("temperature", &temp_msg);
 
-std_msgs::Int32MultiArray optic_flow_msg;
-ros::Publisher pub_optic_flow("optic_flow_front", &optic_flow_msg);
-
 std_msgs::Int32MultiArray optic_flow_msg1;
-ros::Publisher pub_optic_flow1("optic_flow_right", &optic_flow_msg1);
+ros::Publisher pub_optic_flow1("optic_flow_left", &optic_flow_msg1);
 
 std_msgs::Int32MultiArray optic_flow_msg2;
-ros::Publisher pub_optic_flow2("optic_flow_left", &optic_flow_msg2);
+ros::Publisher pub_optic_flow2("optic_flow_back", &optic_flow_msg2);
 
 std_msgs::Int32MultiArray optic_flow_msg3;
-ros::Publisher pub_optic_flow3("optic_flow_back", &optic_flow_msg3);
+ros::Publisher pub_optic_flow3("optic_flow_front", &optic_flow_msg3);
+
+std_msgs::Int32MultiArray optic_flow_msg4;
+ros::Publisher pub_optic_flow4("optic_flow_right", &optic_flow_msg4);
 
 ros::NodeHandle nh;
 
@@ -58,20 +54,20 @@ void setup()
     // Run loop error: Serial Port read failure: device reports readiness to read but returned no data (device disconnected or multiple access on port?
 
     Serial.begin(115200);
-    HWSERIAL.begin(115200, SERIAL_8N1);
-    SESERIAL.begin(115200, SERIAL_8N1);
-    THSERIAL.begin(115200, SERIAL_8N1);
-    FOSERIAL.begin(115200, SERIAL_8N1);
+    Serial1.begin(115200, SERIAL_8N1);
+    Serial2.begin(115200, SERIAL_8N1);
+    Serial3.begin(115200, SERIAL_8N1);
+    Serial4.begin(115200, SERIAL_8N1);
 
     
     //start the ROS node
     nh.getHardware()->setBaud(115200);
     nh.initNode();
     // nh.loginfo("Program info");
-    nh.advertise(pub_optic_flow);
     nh.advertise(pub_optic_flow1);
     nh.advertise(pub_optic_flow2);
     nh.advertise(pub_optic_flow3);
+    nh.advertise(pub_optic_flow4);
 }
 
 ///////////////////////
@@ -89,9 +85,6 @@ void loop()
   // 255, 1,36, 46, Arg 0, Arg 1, Arg 2, Arg 3, 255, 254 // Change HT Command
   // Arg 0 - 3 are four bytes that comprise of a single parameter, wait 1/10s between changinh parameters
 
-  int RxMsg;
-  unsigned int bytecount = 0;
-  unsigned char Data[246];
 
   int RxMsg1;
   unsigned int bytecount1 = 0;
@@ -105,11 +98,15 @@ void loop()
   unsigned int bytecount3 = 0;
   unsigned char Data3[246];
 
+  int RxMsg4;
+  unsigned int bytecount4 = 0;
+  unsigned char Data4[246];
 
-  HWSERIAL.write(TxMsg, 6);
-  SESERIAL.write(TxMsg, 6);
-  THSERIAL.write(TxMsg, 6);
-  FOSERIAL.write(TxMsg, 6);
+
+  Serial1.write(TxMsg, 6);
+  Serial2.write(TxMsg, 6);
+  Serial4.write(TxMsg, 6);
+  Serial3.write(TxMsg, 6);
  
   
   // Serial.println();
@@ -119,23 +116,9 @@ void loop()
   // Buffer of UART probably small, this makes sure buffer has some bytes
   delay(1); // Need 3ms delay before reading Device ID (otherwise first byte = 252)
 
-  while(HWSERIAL.available() && bytecount < 246)
+  while(Serial1.available() && bytecount1 < 246)
   {
-    RxMsg = HWSERIAL.read();
-    // Serial.print(RxMsg);
-    // Serial.print(", ");
-    Data[bytecount] = RxMsg;
-
-    bytecount++;
-    
-    // Delay must be short to prevent buffer from overflowing, but long enough for a new byte to come in.
-    delayMicroseconds(90);
-  }
-
- while(SESERIAL.available() && bytecount1 < 246)
-  {
-
-    RxMsg1 = SESERIAL.read();
+    RxMsg1 = Serial1.read();
     // Serial.print(RxMsg);
     // Serial.print(", ");
     Data1[bytecount1] = RxMsg1;
@@ -144,12 +127,13 @@ void loop()
     
     // Delay must be short to prevent buffer from overflowing, but long enough for a new byte to come in.
     delayMicroseconds(90);
-  
   }
 
-  while(THSERIAL.available() && bytecount2 < 246)
+
+  while(Serial2.available() && bytecount2 < 246)
   {
-    RxMsg2 = THSERIAL.read();
+
+    RxMsg2 = Serial2.read();
     // Serial.print(RxMsg);
     // Serial.print(", ");
     Data2[bytecount2] = RxMsg2;
@@ -158,11 +142,12 @@ void loop()
     
     // Delay must be short to prevent buffer from overflowing, but long enough for a new byte to come in.
     delayMicroseconds(90);
+  
   }
 
-   while(FOSERIAL.available() && bytecount3 < 246)
+  while(Serial3.available() && bytecount3 < 246)
   {
-    RxMsg3 = FOSERIAL.read();
+    RxMsg3 = Serial3.read();
     // Serial.print(RxMsg);
     // Serial.print(", ");
     Data3[bytecount3] = RxMsg3;
@@ -173,7 +158,18 @@ void loop()
     delayMicroseconds(90);
   }
 
+  while(Serial4.available() && bytecount4 < 246)
+  {
+    RxMsg4 = Serial4.read();
+    // Serial.print(RxMsg);
+    // Serial.print(", ");
+    Data4[bytecount4] = RxMsg4;
 
+    bytecount4++;
+    
+    // Delay must be short to prevent buffer from overflowing, but long enough for a new byte to come in.
+    delayMicroseconds(90);
+  }
 
   // Enhance readability in serial monitor
   delay(50);
@@ -184,92 +180,39 @@ void loop()
   // If Serial.clear() is NOT COMMENTED OUT, CAUSES ROS RUNTIME ERROR:
   // Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
   
-  HWSERIAL.clear();
-  SESERIAL.clear();
-  THSERIAL.clear();
-  FOSERIAL.clear();
+  Serial1.clear();
+  Serial2.clear();
+  Serial3.clear();
+  Serial4.clear();
  
-  /////////////////////////////
-  // ASSIGN DATA TO POINTERS //
-  /////////////////////////////
-
-  // Int = 32 Bytes
-  int *p_int = (int*)Data;
-
-  // Short Int = 16 Bytes
-  short *p_short = (short*)Data;
-
   //////////////////////////////
   // ASSIGN DATA TO VARIABLES //
   //////////////////////////////
 
-  signed char CapQX[121], CapQY[121];
-   signed char CapQX1[121], CapQY1[121];
-   signed char CapQX2[121], CapQY2[121];
-    signed char CapQX3[121], CapQY3[121];
-   
-
+  signed char CapQX1[121], CapQY1[121];
+  signed char CapQX2[121], CapQY2[121];
+  signed char CapQX3[121], CapQY3[121];
+  signed char CapQX4[121], CapQY4[121];
+  
   // Window 0 = Global
   // Window 1 - 24 = Classic V1
   // Window 25 - 120 = Small
   for(int i = 0; i < 121; i++)
   {
-    CapQX[i] = Data[4+2*i];
-    CapQY[i] = Data[5+2*i];
-   
+    CapQX1[i] =   Data1[4+2*i];
+    CapQY1[i] = - Data1[5+2*i];
+    CapQX2[i] =   Data2[4+2*i];
+    CapQY2[i] = - Data2[5+2*i];
+    CapQX3[i] =   Data3[4+2*i];
+    CapQY3[i] = - Data3[5+2*i];
+    CapQX4[i] =   Data4[4+2*i];
+    CapQY4[i] = - Data4[5+2*i];
   }
-
-
-  for(int i = 0; i < 121; i++)
-  {
-    CapQX1[i] = Data1[4+2*i];
-    CapQY1[i] = Data1[5+2*i];
-  }
-
-  for(int i = 0; i < 121; i++)
-  {
-    CapQX2[i] = Data2[4+2*i];
-    CapQY2[i] = Data2[5+2*i];
-  }
-
-   for(int i = 0; i < 121; i++)
-  {
-    CapQX3[i] = Data3[4+2*i];
-    CapQY3[i] = Data3[5+2*i];
-  }
-
 
   //FRONT
-  optic_flow_msg.layout.dim = (std_msgs::MultiArrayDimension *)
-  malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
-  optic_flow_msg.layout.dim[0].label = "length";
-  optic_flow_msg.layout.dim[0].size = 242;
-  optic_flow_msg.layout.dim[0].stride = 242;
-  optic_flow_msg.layout.data_offset = 0;
-  optic_flow_msg.data_length = 242; // THIS LINE IS CRUCIAL! 
-                                  // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
-                                  // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg.data = (long int *)malloc(sizeof(int)*242); 
-
-  for (int i = 0; i < 121; i++) 
-  {
-    optic_flow_msg.data[i] = CapQX[i];
-  }
-  for (int i = 0; i < 121; i++) 
-  {
-    optic_flow_msg.data[121+i] = CapQY[i];
-  }
-
-  pub_optic_flow.publish(&optic_flow_msg);
-
-  free(optic_flow_msg.data);
-  free(optic_flow_msg.layout.dim);
-
-
-  //RIGHT
   optic_flow_msg1.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
-  optic_flow_msg1.layout.dim[0].label = "length1";
+  optic_flow_msg1.layout.dim[0].label = "length";
   optic_flow_msg1.layout.dim[0].size = 242;
   optic_flow_msg1.layout.dim[0].stride = 242;
   optic_flow_msg1.layout.data_offset = 0;
@@ -285,19 +228,18 @@ void loop()
   for (int i = 0; i < 121; i++) 
   {
     optic_flow_msg1.data[121+i] = CapQY1[i];
-  }p
+  }
 
   pub_optic_flow1.publish(&optic_flow_msg1);
 
   free(optic_flow_msg1.data);
   free(optic_flow_msg1.layout.dim);
 
-  
 
-  //LEFT
+  //RIGHT
   optic_flow_msg2.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
-  optic_flow_msg2.layout.dim[0].label = "length2";
+  optic_flow_msg2.layout.dim[0].label = "length1";
   optic_flow_msg2.layout.dim[0].size = 242;
   optic_flow_msg2.layout.dim[0].stride = 242;
   optic_flow_msg2.layout.data_offset = 0;
@@ -321,11 +263,11 @@ void loop()
   free(optic_flow_msg2.layout.dim);
 
   
-  
-  //BACK
+
+  //LEFT
   optic_flow_msg3.layout.dim = (std_msgs::MultiArrayDimension *)
   malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
-  optic_flow_msg3.layout.dim[0].label = "length3";
+  optic_flow_msg3.layout.dim[0].label = "length2";
   optic_flow_msg3.layout.dim[0].size = 242;
   optic_flow_msg3.layout.dim[0].stride = 242;
   optic_flow_msg3.layout.data_offset = 0;
@@ -347,6 +289,34 @@ void loop()
 
   free(optic_flow_msg3.data);
   free(optic_flow_msg3.layout.dim);
+
+  
+  
+  //BACK
+  optic_flow_msg4.layout.dim = (std_msgs::MultiArrayDimension *)
+  malloc(sizeof(std_msgs::MultiArrayDimension) * 2);
+  optic_flow_msg4.layout.dim[0].label = "length3";
+  optic_flow_msg4.layout.dim[0].size = 242;
+  optic_flow_msg4.layout.dim[0].stride = 242;
+  optic_flow_msg4.layout.data_offset = 0;
+  optic_flow_msg4.data_length = 242; // THIS LINE IS CRUCIAL! 
+                                  // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
+                                  // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
+  optic_flow_msg4.data = (long int *)malloc(sizeof(int)*242); 
+
+  for (int i = 0; i < 121; i++) 
+  {
+    optic_flow_msg4.data[i] = CapQX4[i];
+  }
+  for (int i = 0; i < 121; i++) 
+  {
+    optic_flow_msg4.data[121+i] = CapQY4[i];
+  }
+
+  pub_optic_flow4.publish(&optic_flow_msg4);
+
+  free(optic_flow_msg4.data);
+  free(optic_flow_msg4.layout.dim);
 
 
   nh.spinOnce();
