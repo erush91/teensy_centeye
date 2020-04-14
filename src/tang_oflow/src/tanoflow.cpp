@@ -243,35 +243,30 @@ public:
 	0.78314,
 	0.75582};
 
-
-
-
 	TanOflow()
 	{
-	front_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_front",10);
-	right_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_right",10);
-	left_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_left",10);
-        back_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_back",10);
+		front_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_front",10);
+		right_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_right",10);
+		left_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_left",10);
+		back_pub = n.advertise<my_msgs::FloatArray_of>("tang_oflow_back",10);
 
-	all_toflow = n.advertise<my_msgs::FloatArray_of>("tang_oflow_all_averaged", 10);
-	horiz_ang = n.advertise<my_msgs::FloatArray_of>("horizontal_angle",10);
-	allof = n.advertise<my_msgs::FloatArray_of>("tang_oflow_all", 10);
-	rows1 = n.advertise<my_msgs::FloatArray_of>("row1",10);
-	rows2 = n.advertise<my_msgs::FloatArray_of>("row2",10);
-	rows3 = n.advertise<my_msgs::FloatArray_of>("row3",10);
-	rows4 = n.advertise<my_msgs::FloatArray_of>("row4",10);
+		all_toflow = n.advertise<my_msgs::FloatArray_of>("tang_oflow_all_averaged", 10);
+		horiz_ang = n.advertise<my_msgs::FloatArray_of>("horizontal_angle",10);
+		allof = n.advertise<my_msgs::FloatArray_of>("tang_oflow_all", 10);
+		rows1 = n.advertise<my_msgs::FloatArray_of>("row1",10);
+		rows2 = n.advertise<my_msgs::FloatArray_of>("row2",10);
+		rows3 = n.advertise<my_msgs::FloatArray_of>("row3",10);
+		rows4 = n.advertise<my_msgs::FloatArray_of>("row4",10);
 
-	 front_sub = n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
-	 right_sub = n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
-	 left_sub = n.subscribe("optic_flow_left", 10, &TanOflow::oflow_left, this);
-	 back_sub = n.subscribe("optic_flow_back", 10, &TanOflow::oflow_back, this);
-	 laser_sub = n.subscribe("scan", 10, &TanOflow::oflow_scan, this);
+		front_sub = n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
+		right_sub = n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
+		left_sub = n.subscribe("optic_flow_left", 10, &TanOflow::oflow_left, this);
+		back_sub = n.subscribe("optic_flow_back", 10, &TanOflow::oflow_back, this);
+		laser_sub = n.subscribe("scan", 10, &TanOflow::oflow_scan, this);
 	}
-
 
 	void oflow_front(const std_msgs::Int32MultiArray& ofront)
 	{
-
 		tan_front.data.clear();	
 		tan_front.data.resize(242);
 		for(int i=0; i<121; i++)
@@ -279,63 +274,44 @@ public:
 			ROS_INFO(" 2 ");
 			tan_front.header.stamp =  ros::Time::now();			
 			tan_front.data[i] = ofront.data[i] * SF[i];
-			tan_front.data[121+i] = ofront.data[121+i] * SF[i];
-			
+			tan_front.data[121+i] = ofront.data[121+i] * SF[i];	
 		}
-
-
-
 	front_pub.publish(tan_front);
 	}
 
-
 	void oflow_right(const std_msgs::Int32MultiArray& oright)
 	{
-
 		tan_right.data.clear();	
 		tan_right.data.resize(242);
 
 		ROS_INFO(" 3 ");
 		for(int i=0; i<121; i++)
 		{
-			
 			tan_right.header.stamp =  ros::Time::now();				
 			tan_right.data[i] = oright.data[i] * SF[i];
 			tan_right.data[121+i] = oright.data[121+i] * SF[i];
-			
 		}
-
 	right_pub.publish(tan_right);
-		
 	}
 
 	void oflow_left(const std_msgs::Int32MultiArray& oleft)
 	{
-		
-		
 		tan_left.data.clear();	
 		tan_left.data.resize(242);
 
 		ROS_INFO(" 4 ");
 		for(int i=0; i<121; i++)
 		{
-			
 			tan_left.header.stamp =  ros::Time::now();				
 			tan_left.data[i] = oleft.data[i] * SF[i];
 			tan_left.data[121+i] = oleft.data[121+i] * SF[i];
-			
 		}
-
-
-	left_pub.publish(tan_left);
-		
+		left_pub.publish(tan_left);
 	}
-
 
 	void oflow_back(const std_msgs::Int32MultiArray& oback)
 	{
-			ROS_INFO(" 5 ");
-	
+		ROS_INFO(" 5 ");
 		
 		tan_back.data.clear();	
 		tan_back.data.resize(242);
@@ -345,14 +321,11 @@ public:
 			tan_back.header.stamp =  ros::Time::now();	
 			tan_back.data[i] = oback.data[i] * SF[i];
 			tan_back.data[121+i] = oback.data[121+i] * SF[i];
-			
 		}
-
-	back_pub.publish(tan_back);
-		
+		back_pub.publish(tan_back);
 	}
 
-	void oflow_scan( const sensor_msgs::LaserScan& oscan)
+	void oflow_scan(const sensor_msgs::LaserScan& oscan)
 	{
 		
 		float front_x[4][24] = {};
@@ -419,42 +392,34 @@ public:
 		dat.data.resize(384);
 
 		int a = 0;
-
-			for(int u= 25; u<37;u++)
-			{
-				last[a] = tan_front.data[u];
-				last[a+12]= tan_front.data[u+24];
-				last[a+24]= tan_front.data[u+48];
-				last[a+36]= tan_front.data[u+72];
-				++a;	 
-			}
+		for(int u= 25; u<37;u++)
+		{
+			last[a] = tan_front.data[u];
+			last[a+12]= tan_front.data[u+24];
+			last[a+24]= tan_front.data[u+48];
+			last[a+36]= tan_front.data[u+72];
+			++a;	 
+		}
 			
 		int b = 0;
-
-			for(int u= 37; u<49;u++)
-			{
-				first[b] = tan_front.data[u];
-				first[b+12]= tan_front.data[u+24];
-				first[b+24]= tan_front.data[u+48];
-				first[b+36]= tan_front.data[u+72];
-				++b;	 
-			}
+		for(int u= 37; u<49;u++)
+		{
+			first[b] = tan_front.data[u];
+			first[b+12]= tan_front.data[u+24];
+			first[b+24]= tan_front.data[u+48];
+			first[b+36]= tan_front.data[u+72];
+			++b;	 
+		}
 				
-
-
 		int v=0;
 		for(int i=0;i<4;i++)
 		{
 			for(int j= 0;j<12;j++)
 			{
-
 				overall[i][j] = first[v];
 				++v;
 			}	
 		}
-
-
-
 
 		int xy=25;
 		for(int i=0; i<4;i++)
@@ -466,34 +431,24 @@ public:
 				overall[i][j+48] = tan_left.data[xy];
 				++xy;
 			}
-
 		}
-
 
 		int t=0;
 		for(int i=0;i<4;i++)
 		{
 			for(int j=84;j<96;j++)
 			{
-
 				overall[i][j] = last[t];
 				++t;
 			}	
 		}
 
+		std::vector<float> vec(384, 0.0);
+		for (int i=0; i<4; i++)
+		for (int j=0; j<96; j++)
+			vec[i*96 + j] = overall[i][j];
+		dat.data = vec;
 
-
-		    std::vector<float> vec(384, 0.0);
-		    for (int i=0; i<4; i++)
-			for (int j=0; j<96; j++)
-			    vec[i*96 + j] = overall[i][j];
-		    dat.header.stamp =  ros::Time::now();
-		    dat.data = vec;
-
-		row1.header.stamp = ros::Time::now();
-		row2.header.stamp = ros::Time::now();
-		row3.header.stamp = ros::Time::now();
-		row4.header.stamp = ros::Time::now();
 
 		for(int i = 0; i<96;i++)
 		{
@@ -512,18 +467,13 @@ public:
 				sum_overall_x[j] += overall[i][j];
 
 			}
-			
 			avg_overall_x[j] = sum_overall_x[j]/4; 
-
 		}
-
-
 
 		tan_allavg_x.header.stamp = ros::Time::now();
 		for(int i=0;i<96;i++)
 		{
 			tan_allavg_x.data[i] = avg_overall_x[i];
-
 		}
 
 		horizontal_angle.header.stamp =  ros::Time::now();
@@ -531,21 +481,28 @@ public:
 		{
 			horizontal_angle.data[i] = HA_plot[i];
 		}
-			
 
-
+		tan_allavg_x.header.stamp = ros::Time::now();
 		all_toflow.publish(tan_allavg_x);
+
+		horizontal_angle.header.stamp =  ros::Time::now();
 		horiz_ang.publish(horizontal_angle);
+
+		dat.header.stamp =  ros::Time::now();
 		allof.publish(dat);
+
+		row1.header.stamp = ros::Time::now();
 		rows1.publish(row1);
+
+		row2.header.stamp = ros::Time::now();
 		rows2.publish(row2);
+
+		row3.header.stamp = ros::Time::now();
 		rows3.publish(row3);
+
+		row4.header.stamp = ros::Time::now();
 		rows4.publish(row4);
-
-
 	}
-
-
 
 private:
 	
@@ -582,13 +539,11 @@ private:
 	my_msgs::FloatArray_of row2;
 	my_msgs::FloatArray_of row3;
 	my_msgs::FloatArray_of row4;
-
 };
 
 
 int main(int argc, char **argv)
 {
-
 	ros::init(argc, argv, "tanoflow");
 
 	TanOflow toflow;

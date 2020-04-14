@@ -46,9 +46,8 @@ void horiz_fourier_coeff(const my_msgs::FloatArray_of::ConstPtr &avg_of, const m
 		avg_off[i] = avg_of->data[i];
 	}
 
-
 	cv::Mat h_cos_gamma_matcv(num_horiz_fourier_terms + 1, num_horiz_of, CV_32FC1, horiz_cos_gamma_arr);
-        cv::Mat h_sin_gamma_matcv(num_horiz_fourier_terms + 1,  num_horiz_of , CV_32FC1, horiz_sin_gamma_arr);
+	cv::Mat h_sin_gamma_matcv(num_horiz_fourier_terms + 1,  num_horiz_of , CV_32FC1, horiz_sin_gamma_arr);
 	cv::Mat average_of(1,96,CV_32FC1, avg_off);
 
 	
@@ -68,21 +67,15 @@ void horiz_fourier_coeff(const my_msgs::FloatArray_of::ConstPtr &avg_of, const m
 	std::vector<float> h_a_vector(h_a, h_a + sizeof h_a / sizeof h_a[0]);
         std::vector<float> h_b_vector(h_b, h_b + sizeof h_b / sizeof h_b[0]);
 
-	
-
 	msg.header.stamp = ros::Time::now();
 	msg.a = h_a_vector;
 	msg.b = h_b_vector;
 	std::cout<< "........................................................................"<<std::endl;
 	fourier_coeffs.publish(msg);
-
-			
 }
-
 
 int main( int argc, char **argv)
 {
-
 
 	ros::init(argc, argv, "controller");
 	ros::NodeHandle nh;
