@@ -224,3 +224,7 @@ add_executable(controller src/controller.cpp)
 target_link_libraries(controller ${catkin_LIBRARIES} ${OpenCV_LIBS})
 #add_dependencies(controller ${catkin_EXPORTED_TARGETS} ${OpenCV_LIBS})
 add_dependencies(controller ${catkin_EXPORTED_TARGETS})
+
+add_executable(tanoflow src/tanoflow.cpp)
+target_link_libraries(tanoflow ${catkin_LIBRARIES})
+add_dependencies(tanoflow ${catkin_EXPORTED_TARGETS})
