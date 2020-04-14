@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 )
 
-
+find_package(OpenCV REQUIRED)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -220,3 +220,7 @@ add_executable(tanoverall src/tanoverall.cpp)
 target_link_libraries(tanoverall ${catkin_LIBRARIES})
 add_dependencies(tanoverall ${catkin_EXPORTED_TARGETS})
 
+add_executable(controller src/controller.cpp)
+target_link_libraries(controller ${catkin_LIBRARIES} ${OpenCV_LIBS})
+#add_dependencies(controller ${catkin_EXPORTED_TARGETS} ${OpenCV_LIBS})
+add_dependencies(controller ${catkin_EXPORTED_TARGETS})
