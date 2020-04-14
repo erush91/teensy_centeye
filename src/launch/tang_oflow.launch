@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="tangoflow" type="tangoflow" pkg="tang_oflow" output="screen">
+  </node>
+  <node name="tanoverall" type="tanoverall" pkg="tang_oflow" output="screen">
+  </node>
+  <node name="controller" type="controller" pkg="tang_oflow" output="screen">
+  </node>
+  <node name="scan_plot" type="opticflow.py" pkg="optic_visualiser" output="screen">
+  </node>
+
+</launch>
