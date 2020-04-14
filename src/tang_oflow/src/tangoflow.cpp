@@ -40,7 +40,8 @@ double tan_y_right[121];
 double tan_y_left[121];
 double tan_y_back[121];*/
 
-double SF[120] = {0.81193,
+double SF[121] = {0,
+0.81193,
 0.91187,
 0.95088,
 0.91187,
