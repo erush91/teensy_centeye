@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>centeye_oflow</name>
+  <name>teensy_centeye</name>
   <version>0.0.0</version>
   <description>The centeye_oflow package</description>
 
