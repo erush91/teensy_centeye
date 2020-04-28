@@ -686,19 +686,18 @@ public:
 
 		int num_horiz_of = 96; 
 		int num_horiz_fourier_terms = 2;
-		float horiz_scan_limit = 2 * M_PI;
+		float horiz_scan_limit = M_PI;
 
 	
 		float h_a[5], h_b[5];
 		float h_dg = 0;
 		float h_dg_pi = 0;
-
 		float horiz_cos_gamma_arr[ num_horiz_fourier_terms + 1][num_horiz_of];
 		float horiz_sin_gamma_arr[ num_horiz_fourier_terms + 1][num_horiz_of];
 
-		h_dg = 2 * (horiz_scan_limit/num_horiz_of);
+		h_dg = (2*horiz_scan_limit)/num_horiz_of;
 
-		h_dg_pi = h_dg / M_PI;
+		//h_dg_pi = 2/num_horiz_of;
 
 
 		cv::Mat h_cos_gamma_matcv(num_horiz_fourier_terms + 1, num_horiz_of, CV_32FC1, horiz_cos_gamma_arr);
@@ -710,12 +709,12 @@ public:
 		{
 			for(int j=0; j< num_horiz_of; j++)
 			{
-				horiz_cos_gamma_arr[i][j] = cos( i * HA_plot[j]);
-				horiz_sin_gamma_arr[i][j] = sin( i * HA_plot[j]);
+				horiz_cos_gamma_arr[i][j] = cos( i*HA_plot[j]/360*2*M_PI);
+				horiz_sin_gamma_arr[i][j] = sin( i*HA_plot[j]/360*2*M_PI);
 			}	
 				
-			h_a[i] = average_of.dot(h_cos_gamma_matcv.row(i)) * h_dg_pi;
-			h_b[i] = average_of.dot(h_sin_gamma_matcv.row(i)) * h_dg_pi;				
+			h_a[i] = average_of.dot(h_cos_gamma_matcv.row(i)) * h_dg / M_PI;
+			h_b[i] = average_of.dot(h_sin_gamma_matcv.row(i)) * h_dg / M_PI;				
 		
 		}
 

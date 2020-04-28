@@ -1,0 +1,8 @@
+<launch>
+
+  <node name="centeye_tan_oflow" type="centeye_tan_oflow" pkg="centeye_oflow" output="screen">
+  </node>
+  <node name="scan_plot" type="opticflow.py" pkg="centeye_oflow" output="screen">
+  </node>
+
+</launch>
