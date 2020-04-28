@@ -13,8 +13,8 @@
 #include<message_filters/subscriber.h>
 #include<message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include<centeye_oflow/FloatArray_of.h>
-#include<centeye_oflow/Fourier_Coeff.h>
+#include<teensy_centeye/FloatArray_of.h>
+#include<teensy_centeye/Fourier_Coeff.h>
 #include <sstream>
 #include <bits/stdc++.h>
 #include <opencv2/opencv.hpp>
@@ -378,21 +378,21 @@ public:
 
 	TanOflow()
 	{
-		front_pub = n.advertise<centeye_oflow::FloatArray_of>("tang_oflow_front",10);
-		right_pub = n.advertise<centeye_oflow::FloatArray_of>("tang_oflow_right",10);
-		left_pub = n.advertise<centeye_oflow::FloatArray_of>("tang_oflow_left",10);
-		back_pub = n.advertise<centeye_oflow::FloatArray_of>("tang_oflow_back",10);
+		front_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_front",10);
+		right_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_right",10);
+		left_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_left",10);
+		back_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_back",10);
 		
 
-		all_toflow = n.advertise<centeye_oflow::FloatArray_of>("tang_oflow_all_averaged", 10);
-		horiz_ang = n.advertise<centeye_oflow::FloatArray_of>("horizontal_angle",10);
-		allof = n.advertise<centeye_oflow::FloatArray_of>("tang_oflow_all", 10);
-		rows1 = n.advertise<centeye_oflow::FloatArray_of>("row1",10);
-		rows2 = n.advertise<centeye_oflow::FloatArray_of>("row2",10);
-		rows3 = n.advertise<centeye_oflow::FloatArray_of>("row3",10);
-		rows4 = n.advertise<centeye_oflow::FloatArray_of>("row4",10);
+		all_toflow = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all_averaged", 10);
+		horiz_ang = n.advertise<teensy_centeye::FloatArray_of>("horizontal_angle",10);
+		allof = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all", 10);
+		rows1 = n.advertise<teensy_centeye::FloatArray_of>("row1",10);
+		rows2 = n.advertise<teensy_centeye::FloatArray_of>("row2",10);
+		rows3 = n.advertise<teensy_centeye::FloatArray_of>("row3",10);
+		rows4 = n.advertise<teensy_centeye::FloatArray_of>("row4",10);
 
-		fourier_coeffs = n.advertise<centeye_oflow::Fourier_Coeff>("/Fourier_Coeffs",10);
+		fourier_coeffs = n.advertise<teensy_centeye::Fourier_Coeff>("/Fourier_Coeffs",10);
 
 		front_sub = n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
 		right_sub = n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
@@ -760,20 +760,20 @@ private:
 	ros::Subscriber back_sub;
 	ros::Subscriber laser_sub;
 
-	centeye_oflow::FloatArray_of tan_front;
-	centeye_oflow::FloatArray_of tan_right;
-	centeye_oflow::FloatArray_of tan_left;
-	centeye_oflow::FloatArray_of tan_back;
+	teensy_centeye::FloatArray_of tan_front;
+	teensy_centeye::FloatArray_of tan_right;
+	teensy_centeye::FloatArray_of tan_left;
+	teensy_centeye::FloatArray_of tan_back;
 
-	centeye_oflow::FloatArray_of tan_allavg_x;
-	centeye_oflow::FloatArray_of horizontal_angle;
-	centeye_oflow::FloatArray_of dat;
-	centeye_oflow::FloatArray_of row1;
-	centeye_oflow::FloatArray_of row2;
-	centeye_oflow::FloatArray_of row3;
-	centeye_oflow::FloatArray_of row4;
+	teensy_centeye::FloatArray_of tan_allavg_x;
+	teensy_centeye::FloatArray_of horizontal_angle;
+	teensy_centeye::FloatArray_of dat;
+	teensy_centeye::FloatArray_of row1;
+	teensy_centeye::FloatArray_of row2;
+	teensy_centeye::FloatArray_of row3;
+	teensy_centeye::FloatArray_of row4;
 	float avg_overall_x[96] = {};
-	centeye_oflow::Fourier_Coeff msg;
+	teensy_centeye::Fourier_Coeff msg;
 
 };
 
@@ -781,7 +781,7 @@ private:
 int main(int argc, char **argv)
 {
 
-	ros::init(argc, argv, "centeye_tan_oflow");
+	ros::init(argc, argv, "teensy_centeye_oflow");
 
 	TanOflow toflow;
 	ros::spin();

@@ -113,7 +113,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES centeye_oflow
+#  LIBRARIES teensy_centeye
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -131,7 +131,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/centeye_oflow.cpp
+#   src/${PROJECT_NAME}/teensy_centeye.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -142,7 +142,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/centeye_oflow_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/teensy_centeye_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -206,14 +206,14 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_centeye_oflow.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_teensy_centeye.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(centeye_tan_oflow src/centeye_tan_oflow.cpp)
-target_link_libraries(centeye_tan_oflow ${catkin_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(centeye_tan_oflow ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+add_executable(teensy_centeye_oflow src/teensy_centeye_oflow.cpp)
+target_link_libraries(teensy_centeye_oflow ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(teensy_centeye_oflow ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 

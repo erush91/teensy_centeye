@@ -1,6 +1,6 @@
 <launch>
 
-  <node name="centeye_tan_oflow" type="centeye_tan_oflow" pkg="teensy_centeye" output="screen">
+  <node name="teensy_centeye_oflow" type="teensy_centeye_oflow" pkg="teensy_centeye" output="screen">
   </node>
   <node name="scan_plot" type="opticflow.py" pkg="teensy_centeye" output="screen">
   </node>
