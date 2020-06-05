@@ -213,9 +213,9 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(teensy_centeye_oflow src/teensy_centeye_oflow.cpp)
-target_link_libraries(teensy_centeye_oflow ${catkin_LIBRARIES} ${OpenCV_LIBS})
-add_dependencies(teensy_centeye_oflow ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+add_executable(LK_HT_4X_wfi src/LK_HT_4X_wfi.cpp)
+target_link_libraries(LK_HT_4X_wfi ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(LK_HT_4X_wfi ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(HT_1X_2D_vis src/HT_1X_2D_vis.cpp)
 target_link_libraries(HT_1X_2D_vis ${catkin_LIBRARIES})
