@@ -2,8 +2,8 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
 #include <geometry_msgs/Point.h>
-#include <std_msgs/Int32MultiArray.h>
-#include <functional> 
+#include <std_msgs/Float32MultiArray.h>
+#include <functional> 		
 #include<math.h>
 #include <iostream>
 
@@ -313,7 +313,7 @@ double VA[120]={-0.33311,
 double HAdegree[120],VAdegree[120];
 
 
-void callback(const std_msgs::Int32MultiArray::ConstPtr & msg);
+void callback(const std_msgs::Float32MultiArray::ConstPtr & msg);
 
 ros::Publisher optic_pub;
 
@@ -341,7 +341,7 @@ int j = 120;
  
 //visualization_msgs::MarkerArray marrays;
 
-void callback(const std_msgs::Int32MultiArray::ConstPtr & msg)
+void callback(const std_msgs::Float32MultiArray::ConstPtr & msg)
 {
  
  

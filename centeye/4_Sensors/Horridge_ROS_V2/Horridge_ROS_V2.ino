@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <ros.h> // PlatformIO Library: rosserial_arduino by Open Agriculture Initiative
-#include <std_msgs/Int32.h>
-#include <std_msgs/Int32MultiArray.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 
 //IMPORTANT
 //While using rosserial make sure to change the value of buffer size in the ros.h(ros_lib folder).
@@ -32,16 +32,16 @@
 // ros::Publisher pub("temperature", &temp_msg);
 int counts=0;
 
-std_msgs::Int32MultiArray optic_flow_msg1;
+std_msgs::Float32MultiArray optic_flow_msg1;
 ros::Publisher pub_optic_flow1("optic_flow_left", &optic_flow_msg1);
 
-std_msgs::Int32MultiArray optic_flow_msg2;
+std_msgs::Float32MultiArray optic_flow_msg2;
 ros::Publisher pub_optic_flow2("optic_flow_back", &optic_flow_msg2);
 
-std_msgs::Int32MultiArray optic_flow_msg3;
+std_msgs::Float32MultiArray optic_flow_msg3;
 ros::Publisher pub_optic_flow3("optic_flow_front", &optic_flow_msg3);
 
-std_msgs::Int32MultiArray optic_flow_msg4;
+std_msgs::Float32MultiArray optic_flow_msg4;
 ros::Publisher pub_optic_flow4("optic_flow_right", &optic_flow_msg4);
 
 ros::NodeHandle nh;
@@ -228,7 +228,7 @@ void loop()
   optic_flow_msg1.data_length = 242; // THIS LINE IS CRUCIAL! 
                                   // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg1.data = (long int *)malloc(sizeof(int)*242); 
+  optic_flow_msg1.data = (float *)malloc(sizeof(float)*242); 
 
   for (int i = 0; i < 121; i++) 
   {
@@ -252,7 +252,7 @@ void loop()
   optic_flow_msg2.data_length = 242; // THIS LINE IS CRUCIAL! 
                                   // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg2.data = (long int *)malloc(sizeof(int)*242); 
+  optic_flow_msg2.data = (float *)malloc(sizeof(float)*242); 
 
   for (int i = 0; i < 121; i++) 
   {
@@ -277,7 +277,7 @@ void loop()
   optic_flow_msg3.data_length = 242; // THIS LINE IS CRUCIAL! 
                                   // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg3.data = (long int *)malloc(sizeof(int)*242); 
+  optic_flow_msg3.data = (float *)malloc(sizeof(float)*242); 
 
   for (int i = 0; i < 121; i++) 
   {
@@ -302,7 +302,7 @@ void loop()
   optic_flow_msg4.data_length = 242; // THIS LINE IS CRUCIAL! 
                                   // https://answers.ros.org/question/37185/how-to-initialize-a-uint8multiarray-message/
                                   // https://answers.ros.org/question/10988/use-multiarray-in-rosserial/
-  optic_flow_msg4.data = (long int *)malloc(sizeof(int)*242); 
+  optic_flow_msg4.data = (float *)malloc(sizeof(float)*242); 
 
   for (int i = 0; i < 121; i++) 
   {

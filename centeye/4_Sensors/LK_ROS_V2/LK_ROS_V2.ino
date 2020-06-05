@@ -179,6 +179,7 @@ void loop()
   Serial2.clear();
   Serial3.clear();
   Serial4.clear();
+  delay(14);
   
 
   /////////////////////////////

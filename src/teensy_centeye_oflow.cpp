@@ -1,781 +1,549 @@
-#include<ros/ros.h>
-#include<iostream>
-#include<algorithm>
-#include<std_msgs/Int32MultiArray.h>
-#include<std_msgs/Float32MultiArray.h>
-#include<sensor_msgs/LaserScan.h>
-#include<std_msgs/Header.h>
-#include <vector>
-#include <iterator>
-#include<math.h>
-#include<std_msgs/MultiArrayDimension.h>
-#include <std_msgs/Int32.h>
-#include<message_filters/subscriber.h>
-#include<message_filters/time_synchronizer.h>
-#include <message_filters/sync_policies/approximate_time.h>
-#include<teensy_centeye/FloatArray_of.h>
-#include<teensy_centeye/Fourier_Coeff.h>
-#include <sstream>
-#include <bits/stdc++.h>
-#include <opencv2/opencv.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include<numeric>
+#include "/home/ghokulji/workspace_ud/src/teensy_centeye/include/oflow.h"
 
 
-using namespace cv_bridge;
-using namespace std;
-using namespace message_filters;
+TanOflow::TanOflow(){
+	front_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_front",10);
+	right_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_right",10);
+	left_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_left",10);
+	back_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_back",10);
+		
 
-class TanOflow
-{
+	all_toflow = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all_averaged", 10);
 	
-public:
+	
+	allof = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all", 10);
+	rows1 = n.advertise<teensy_centeye::FloatArray_of>("row1",10);
+	rows2 = n.advertise<teensy_centeye::FloatArray_of>("row2",10);
+	rows3 = n.advertise<teensy_centeye::FloatArray_of>("row3",10);
+	rows4 = n.advertise<teensy_centeye::FloatArray_of>("row4",10);
 
-	float HA_plot[96] = {0,
-	3.8779,
-	7.74839,
-	11.60688,
-	15.44868,
-	19.27138,
-	23.07358,
-	26.85568,
-	30.62088,
-	34.37458,
-	38.12658,
-	41.89028,
-	44.26298,
-	48.03458,
-	51.78838,
-	55.54038,
-	59.30088,
-	63.07698,
-	66.87218,
-	70.68798,
-	74.52398,
-	78.37718,
-	82.24415,
-	86.12023,
-	90,
-	93.8779,
-	97.74839,
-	101.60688,
-	105.44868,
-	109.27138,
-	113.07358,
-	116.85568,
-	120.62088,
-	124.37458,
-	128.12658,
-	131.89028,
-	134.26298,
-	138.03458,
-	141.78838,
-	145.54038,
-	149.30088,
-	153.07698,
-	156.87218,
-	160.68798,
-	164.52398,
-	168.37718,
-	172.24415,
-	176.12023,
-	180,
-	183.8779,
-	187.74839,
-	191.60688,
-	195.44868,
-	199.27138,
-	203.07358,
-	206.85568,
-	210.62088,
-	214.37458,
-	218.12658,
-	221.89028,
-	224.26298,
-	228.03458,
-	231.78838,
-	235.54038,
-	239.30088,
-	243.07698,
-	246.87218,
-	250.68798,
-	254.52398,
-	258.37718,
-	262.24415,
-	266.12023,
-	270,
-	273.8779,
-	277.74839,
-	281.60688,
-	285.44868,
-	289.27138,
-	293.07358,
-	296.85568,
-	300.62088,
-	304.37458,
-	308.12658,
-	311.89028, 
-	314.26298, 
-	318.03458,
-	321.78838,
-	325.54038,
-	329.30088,
-	333.07698,
-	336.87218,
-	340.68798,
-	344.52398,
-	348.37718,
-	352.24415,
-	356.12023
-	};
+	fourier_coeffs = n.advertise<teensy_centeye::Fourier_Coeff>("/Fourier_Coeffs",10);
+
+	front_sub = n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
+	right_sub = n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
+	left_sub = n.subscribe("optic_flow_left", 10, &TanOflow::oflow_left, this);
+	back_sub = n.subscribe("optic_flow_back", 10, &TanOflow::oflow_back, this);
+
+	//steering control parameters
+	n.getParam("/orientation_gain",gain_k1);
+	n.getParam("/lateral_gain", gain_k2);
+
+}
 
 
-	float SF[242] = {0,
-	0.81193,
-	0.91187,
-	0.95088,
-	0.91187,
-	0.81193,
-	0.84337,
-	0.95172,
-	0.99429,
-	0.95172,
-	0.84337,
-	0.84337,
-	0.95172,
-	0.99429,
-	0.95172,
-	0.84337,
-	0.81193,
-	0.91187,
-	0.95088,
-	0.91187,
-	0.81193,
-	0.90056,
-	0.90056,
-	0.90056,
-	0.90056,
-	0.75308,
-	0.77935,
-	0.80484,
-	0.8292,
-	0.85207,
-	0.87308,
-	0.89185,
-	0.90802,
-	0.92127,
-	0.93132,
-	0.93793,
-	0.94097,
-	0.94036,
-	0.93612,
-	0.92834,
-	0.9172,
-	0.90294,
-	0.88586,
-	0.86631,
-	0.84464,
-	0.82123,
-	0.79645,
-	0.77067,
-	0.7442,
-	0.78426,
-	0.8128,
-	0.84056,
-	0.86717,
-	0.89221,
-	0.91527,
-	0.93592,
-	0.95375,
-	0.96838,
-	0.97948,
-	0.9868,
-	0.99017,
-	0.98949,
-	0.9848,
-	0.97619,
-	0.96388,
-	0.94814,
-	0.92933,
-	0.90783,
-	0.88406,
-	0.85845,
-	0.83142,
-	0.80336,
-	0.77464,
-	0.78852,
-	0.81738,
-	0.84546,
-	0.87238,
-	0.89773,
-	0.92108,
-	0.94199,
-	0.96005,
-	0.97488,
-	0.98613,
-	0.99356,
-	0.99697,
-	0.99628,
-	0.99152,
-	0.9828,
-	0.97032,
-	0.95437,
-	0.93532,
-	0.91354,
-	0.88948,
-	0.86356,
-	0.8362,
-	0.80783,
-	0.7788,
-	0.76498,
-	0.79211,
-	0.81845,
-	0.84365,
-	0.86734,
-	0.88912,
-	0.90859,
-	0.92538,
-	0.93915,
-	0.94959,
-	0.95647,
-	0.95963,
-	0.959,
-	0.95458,
-	0.94649,
-	0.93491,
-	0.9201,
-	0.90238,
-	0.88209,
-	0.85964,
-	0.8354,
-	0.80978,
-	0.78314,
-	0.75582,
-	0,
-	0.81193,
-	0.91187,
-	0.95088,
-	0.91187,
-	0.81193,
-	0.84337,
-	0.95172,
-	0.99429,
-	0.95172,
-	0.84337,
-	0.84337,
-	0.95172,
-	0.99429,
-	0.95172,
-	0.84337,
-	0.81193,
-	0.91187,
-	0.95088,
-	0.91187,
-	0.81193,
-	0.90056,
-	0.90056,
-	0.90056,
-	0.90056,
-	0.75308,
-	0.77935,
-	0.80484,
-	0.8292,
-	0.85207,
-	0.87308,
-	0.89185,
-	0.90802,
-	0.92127,
-	0.93132,
-	0.93793,
-	0.94097,
-	0.94036,
-	0.93612,
-	0.92834,
-	0.9172,
-	0.90294,
-	0.88586,
-	0.86631,
-	0.84464,
-	0.82123,
-	0.79645,
-	0.77067,
-	0.7442,
-	0.78426,
-	0.8128,
-	0.84056,
-	0.86717,
-	0.89221,
-	0.91527,
-	0.93592,
-	0.95375,
-	0.96838,
-	0.97948,
-	0.9868,
-	0.99017,
-	0.98949,
-	0.9848,
-	0.97619,
-	0.96388,
-	0.94814,
-	0.92933,
-	0.90783,
-	0.88406,
-	0.85845,
-	0.83142,
-	0.80336,
-	0.77464,
-	0.78852,
-	0.81738,
-	0.84546,
-	0.87238,
-	0.89773,
-	0.92108,
-	0.94199,
-	0.96005,
-	0.97488,
-	0.98613,
-	0.99356,
-	0.99697,
-	0.99628,
-	0.99152,
-	0.9828,
-	0.97032,
-	0.95437,
-	0.93532,
-	0.91354,
-	0.88948,
-	0.86356,
-	0.8362,
-	0.80783,
-	0.7788,
-	0.76498,
-	0.79211,
-	0.81845,
-	0.84365,
-	0.86734,
-	0.88912,
-	0.90859,
-	0.92538,
-	0.93915,
-	0.94959,
-	0.95647,
-	0.95963,
-	0.959,
-	0.95458,
-	0.94649,
-	0.93491,
-	0.9201,
-	0.90238,
-	0.88209,
-	0.85964,
-	0.8354,
-	0.80978,
-	0.78314,
-	0.75582};
+//Front Optic Flow
+void TanOflow::oflow_front(const std_msgs::Float32MultiArray& ofront){
+	
+   
+    //determine size of optic flow message
+	std::vector<int> v(std::begin(ofront.data), std::end(ofront.data));
+	oflow_size = v.size();
+	ROS_INFO("Size of %d", oflow_size);
+	init(oflow_size);
 
-
-
-
-	TanOflow()
-	{
-		front_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_front",10);
-		right_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_right",10);
-		left_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_left",10);
-		back_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_back",10);
+	//Lucas Kanade
+    if(oflow_size == 48)
+    {   
 		
+        tan_front.data.clear();	
+        tan_front.data.resize(oflow_size);
+        for(int i=0; i<oflow_size; i++)
+        {
+                            
+            tan_front.data[i] = ofront.data[i] * SF_LK[i];
+                
+        }
 
-		all_toflow = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all_averaged", 10);
-		horiz_ang = n.advertise<teensy_centeye::FloatArray_of>("horizontal_angle",10);
-		allof = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all", 10);
-		rows1 = n.advertise<teensy_centeye::FloatArray_of>("row1",10);
-		rows2 = n.advertise<teensy_centeye::FloatArray_of>("row2",10);
-		rows3 = n.advertise<teensy_centeye::FloatArray_of>("row3",10);
-		rows4 = n.advertise<teensy_centeye::FloatArray_of>("row4",10);
+        tan_front.header.stamp =  ros::Time::now();
+        front_pub.publish(tan_front);
+    }
 
-		fourier_coeffs = n.advertise<teensy_centeye::Fourier_Coeff>("/Fourier_Coeffs",10);
+	//Horridge Template
+    else if(oflow_size == 242)
+    {
+        tan_front.data.clear();	
+        tan_front.data.resize(oflow_size);
+        for(int i=0; i<oflow_size; i++)
+        {
+                            
+            tan_front.data[i] = ofront.data[i] * SF_HT[i];
+                
+        }
 
-		front_sub = n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
-		right_sub = n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
-		left_sub = n.subscribe("optic_flow_left", 10, &TanOflow::oflow_left, this);
-		back_sub = n.subscribe("optic_flow_back", 10, &TanOflow::oflow_back, this);
+        tan_front.header.stamp =  ros::Time::now();
+        front_pub.publish(tan_front);
+    }
 
-	}
+    else
+    {	
+		//ROS_INFO("Size of %d", oflow_size);
+        ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
+    }
 
+}
 
-	void oflow_front(const std_msgs::Int32MultiArray& ofront)
-	{
+//Right Optic Flow
+void TanOflow::oflow_right(const std_msgs::Float32MultiArray& oright){
 
-		tan_front.data.clear();	
-		tan_front.data.resize(242);
-		for(int i=0; i<242; i++)
+    if(oflow_size == 48)
+    {
+        tan_right.data.clear();	
+        tan_right.data.resize(oflow_size);
+
+        for(int i=0; i<48; i++)
+        {
+                
+            tan_right.data[i] = oright.data[i] * SF_LK[i];
+                
+        }
+        tan_right.header.stamp =  ros::Time::now();
+        right_pub.publish(tan_right);
+    }
+
+    else if(oflow_size == 242)
+    {
+        tan_right.data.clear();	
+        tan_right.data.resize(oflow_size);
+
+        for(int i=0; i<242; i++)
+        {
+                
+            tan_right.data[i] = oright.data[i] * SF_HT[i];
+                
+        }
+        tan_right.header.stamp =  ros::Time::now();
+        right_pub.publish(tan_right);
+    }
+
+    else
+    {
+        ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
+    }
+
+	
+		
+}
+
+//Left Optic Flow
+void TanOflow::oflow_left(const std_msgs::Float32MultiArray& oleft){
+	
+     if(oflow_size == 48)
+    {
+        tan_left.data.clear();	
+        tan_left.data.resize(oflow_size);
+
+        for(int i=0; i<48; i++)
+        {
+                
+            tan_left.data[i] = oleft.data[i] * SF_LK[i];
+                
+        }
+
+        tan_left.header.stamp =  ros::Time::now();	
+        left_pub.publish(tan_left);
+    }
+
+    else if(oflow_size == 242)
+    {
+        tan_left.data.clear();	
+        tan_left.data.resize(oflow_size);
+
+        for(int i=0; i<242; i++)
+        {
+                
+            tan_left.data[i] = oleft.data[i] * SF_HT[i];
+                
+        }
+
+        tan_left.header.stamp =  ros::Time::now();	
+        left_pub.publish(tan_left);
+    }
+
+    else
+    {
+        ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
+    }
+		
+}
+
+//Back Optic Flow
+void TanOflow::oflow_back(const std_msgs::Float32MultiArray& oback)	{
+
+    if(oflow_size == 48)
+    {
+        tan_back.data.clear();	
+        tan_back.data.resize(oflow_size);
+
+        for(int i=0; i<48; i++)
+        {
+                    
+            tan_back.data[i] = oback.data[i] * SF_LK[i];
+                
+        }
+        tan_back.header.stamp =  ros::Time::now();
+        back_pub.publish(tan_back);
+    }
+
+    else if(oflow_size == 242)
+    {
+        tan_back.data.clear();	
+        tan_back.data.resize(oflow_size);
+
+        for(int i=0; i<242; i++)
+        {
+                    
+            tan_back.data[i] = oback.data[i] * SF_HT[i];
+                
+        }
+        tan_back.header.stamp =  ros::Time::now();
+        back_pub.publish(tan_back);
+    }
+
+    else
+    {
+        ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
+    }
+	
+    average();	
+	fourier_coeffec();
+	computeRobotTurnRate();
+}
+
+//initialise the variables acccording to message size
+void TanOflow::init(int of_size){
+
+	//Lucas Kanade
+	if(oflow_size == 48)
+    {
+		horiz_ang_lk = n.advertise<teensy_centeye::FloatArray_of>("horizontal_angle_lk",10);
+		horizontal_angle_lk.data.clear();
+		horizontal_angle_lk.data.resize(48);
+
+		row_size = 4;
+		col_size = 20;
+		dat_size = row_size * col_size;
+		dat_start = 0;
+
+		last_size = 8;
+		last_inc = 2;
+		last_col_start = 0;
+		last_col_end = 2;
+
+		first_size = 12;
+		first_inc = 3;
+		first_col_start = 2;
+		first_col_end = 5;
+
+		data_inc = 5;
+
+		overall_first_start = 0;
+		overall_middle_start = 3;
+		overall_last_start = 18;
+
+		overall_first_end = 3;
+		overall_middle_end = 8;
+		overall_last_end = 20;
+
+		num_horiz_of = 20;
+		
+		//LK angle(x)
+		for(int i=0;i< 48;i++)
 		{
-						
-			tan_front.data[i] = ofront.data[i] * SF[i];
-			
+			horizontal_angle_lk.data[i] = HA_LK[i];
 		}
 
-	tan_front.header.stamp =  ros::Time::now();
-	front_pub.publish(tan_front);
-	}
+		horizontal_angle_lk.header.stamp =  ros::Time::now();
+		horiz_ang_lk.publish(horizontal_angle_lk);
 
 
-	void oflow_right(const std_msgs::Int32MultiArray& oright)
-	{
+    }
 
-		tan_right.data.clear();	
-		tan_right.data.resize(242);
+	//Horridge Template
+    else if(oflow_size == 242)
+    {
+		horiz_ang_ht = n.advertise<teensy_centeye::FloatArray_of>("horizontal_angle_ht",10);
+		horizontal_angle_ht.data.clear();
+		horizontal_angle_ht.data.resize(96);
 
-		for(int i=0; i<242; i++)
+       	row_size = 4;
+		col_size = 96;
+		dat_size = row_size * col_size;
+		dat_start = 25;
+
+
+		last_size = 48;
+		last_inc = 12;
+		last_col_start = 25;
+		last_col_end = 37;
+
+		first_size = 48;
+		first_inc = 12;
+		first_col_start = 37;
+		first_col_end = 49;
+
+		data_inc = 24;
+
+		overall_first_start = 0;
+		overall_middle_start = 12;
+		overall_last_start = 84;
+
+		overall_first_end = 12;
+		overall_middle_end = 36;
+		overall_last_end = 96;
+
+		num_horiz_of = 96;
+
+		//HT angle(x)
+		for(int i=0;i< 96;i++)
 		{
-			
-			tan_right.data[i] = oright.data[i] * SF[i];
-			
+			horizontal_angle_ht.data[i] = HA_HT[i];
 		}
-	tan_right.header.stamp =  ros::Time::now();
-	right_pub.publish(tan_right);
-		
-	}
 
-	void oflow_left(const std_msgs::Int32MultiArray& oleft)
+		horizontal_angle_ht.header.stamp =  ros::Time::now();
+		horiz_ang_ht.publish(horizontal_angle_ht);
+    }
+
+    else
+    {
+        ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
+    }
+
+
+}
+
+//Average the tangential optic flow column wise to get 1D Optic flow
+void TanOflow::average(){
+	float overall[row_size][col_size]= {};
+
+	float sum_overall_x[col_size] = {}; 
+	float avg_overall_x[col_size] = {};
+
+	float last[last_size] = {};
+	float first[first_size]={};
+
+	tan_allavg_x.data.clear();	
+	tan_allavg_x.data.resize(col_size);
+
+	row1.data.clear();	
+	row1.data.resize(col_size);
+		
+	row2.data.clear();	
+	row2.data.resize(col_size);
+
+	row3.data.clear();	
+	row3.data.resize(col_size);
+
+	row4.data.clear();	
+	row4.data.resize(col_size);
+
+	dat.data.clear();
+	dat.data.resize(dat_size);
+
+	//split front optic flow 
+	int a = 0;
+
+	for(int u = last_col_start; u < last_col_end;u++)
 	{
-		
-		
-		tan_left.data.clear();	
-		tan_left.data.resize(242);
-
-		for(int i=0; i<242; i++)
-		{
-			
-						
-			tan_left.data[i] = oleft.data[i] * SF[i];
-			
-		}
-
-	tan_left.header.stamp =  ros::Time::now();	
-	left_pub.publish(tan_left);
-		
+	    last[a] = tan_front.data[u];
+		last[a+ last_inc]= tan_front.data[u+ data_inc];
+		last[a+ last_inc*2]= tan_front.data[u+ data_inc*2];
+		last[a+ last_inc*3]= tan_front.data[u+ data_inc*3];
+		++a;	 
 	}
-
-
-	void oflow_back(const std_msgs::Int32MultiArray& oback)	{
-		
-		tan_back.data.clear();	
-		tan_back.data.resize(242);
-
-		for(int i=0; i<242; i++)
-		{
-				
-			tan_back.data[i] = oback.data[i] * SF[i];
 			
-		}
-	tan_back.header.stamp =  ros::Time::now();
-	back_pub.publish(tan_back);
+	int b = 0;
 
-
-	average();	
-	controller();
-	}
-
-	void average()
+	for(int u= first_col_start; u < first_col_end; u++)
 	{
-		
-		float front_x[4][24] = {};
-		float front_y[4][24] = {};
-		float right_x[4][24]= {};
-		float right_y[4][24]= {};
-		float ha[4][24]= {};
-
-		float left_x[4][24]= {};
-		float left_y[4][24]= {};
-		float back_x[4][24]= {};
-		float back_y[4][24]= {};
-
-		float sum_right_y[24]= {};
-		float sum_left_y[24]= {};
-		float sum_back_y[24]= {};
-		float sum_front_y[24]= {};
-
-		float sum_right_xavg[24]= {};
-		float sum_left_xavg[24]= {};
-		float sum_back_xavg[24]= {};
-		float sum_front_xavg[24]= {};
-
-		float sum_right_yavg[24]= {};
-		float sum_left_yavg[24]= {};
-		float sum_back_yavg[24]= {};
-		float sum_front_yavg[24]= {};
-
-		float sum_right_x[24]= {};
-		float sum_left_x[24]= {};
-		float sum_back_x[24]= {};
-		float sum_front_x[24]= {};
-
-		float sum_ha[24]= {};	
-		float sum_haavg[24]= {};
-
-		float overall[4][96]= {};
-
-		float sum_overall_x[96] = {}; 
-		//float avg_overall_x[96] = {};
-
-		float last[48] = {};
-		float first[48]={};
-
-		tan_allavg_x.data.clear();	
-		tan_allavg_x.data.resize(96);
-
-		row1.data.clear();	
-		row1.data.resize(96);
-		
-		row2.data.clear();	
-		row2.data.resize(96);
-
-		row3.data.clear();	
-		row3.data.resize(96);
-
-		row4.data.clear();	
-		row4.data.resize(96);
-		
-		horizontal_angle.data.clear();
-		horizontal_angle.data.resize(96);
-
-		dat.data.clear();
-		dat.data.resize(384);
-
-		int a = 0;
-
-			for(int u= 25; u<37;u++)
-			{
-				last[a] = tan_front.data[u];
-				last[a+12]= tan_front.data[u+24];
-				last[a+24]= tan_front.data[u+48];
-				last[a+36]= tan_front.data[u+72];
-				++a;	 
-			}
-			
-		int b = 0;
-
-			for(int u= 37; u<49;u++)
-			{
-				first[b] = tan_front.data[u];
-				first[b+12]= tan_front.data[u+24];
-				first[b+24]= tan_front.data[u+48];
-				first[b+36]= tan_front.data[u+72];
-				++b;	 
-			}
+		first[b] = tan_front.data[u];
+		first[b+ first_inc]= tan_front.data[u+ data_inc];
+		first[b+ first_inc*2]= tan_front.data[u+ data_inc*2];
+		first[b+ first_inc*3]= tan_front.data[u+ data_inc*3];
+		++b;	 
+	}
 				
 
-
-		int v=0;
-		for(int i=0;i<4;i++)
+	//overall optic flow structure: *front_first|right back|left|front_last*
+	int v=0;
+	for(int i=0;i<4;i++)
+	{
+		for(int j= 0;j<overall_first_end;j++)
 		{
-			for(int j= 0;j<12;j++)
-			{
 
-				overall[i][j] = first[v];
-				++v;
-			}	
-		}
+			overall[i][j] = first[v];
+			++v;
+		}	
+	}
 
 
 
 
-		int xy=25;
-		for(int i=0; i<4;i++)
+	int xy=dat_start; //data_start
+	for(int i=0; i<4;i++)
+	{
+		for(int j = overall_middle_start; j< overall_middle_end;j++)
 		{
-			for(int j = 12; j<36;j++)
-			{
-				overall[i][j] = tan_right.data[xy];
-				overall[i][j+24] = tan_back.data[xy];
-				overall[i][j+48] = tan_left.data[xy];
-				++xy;
-			}
+			overall[i][j] = tan_right.data[xy];
+			overall[i][j+data_inc] = tan_back.data[xy];
+			overall[i][j+ data_inc*2] = tan_left.data[xy];
+			++xy;
+	    }
 
-		}
+	}
 
 
-		int t=0;
-		for(int i=0;i<4;i++)
+	int t=0;
+	for(int i=0;i<4;i++)
+	{
+		for(int j=overall_last_start;j<overall_last_end ;j++)
 		{
-			for(int j=84;j<96;j++)
-			{
 
-				overall[i][j] = last[t];
-				++t;
-			}	
-		}
+			overall[i][j] = last[t];
+			++t;
+		}	
+	}
 
 
 
-		    std::vector<float> vec(384, 0.0);
-		    for (int i=0; i<4; i++)
-			for (int j=0; j<96; j++)
-			    vec[i*96 + j] = overall[i][j];
+	std::vector<float> vec(dat_size, 0.0);
+	for (int i=0; i<row_size; i++){
+	    for (int j=0; j<col_size; j++){
+		    vec[i*col_size + j] = overall[i][j];
 		    dat.data = vec;
-
+        }
+    }
 		
-		for(int i = 0; i<96;i++)
-		{
-			row1.data[i] = dat.data[i];
-			row2.data[i] = dat.data[i+96];
-			row3.data[i] = dat.data[i+192];
-			row4.data[i]= dat.data[i+288];
-		}
+	for(int i = 0; i<col_size;i++)
+    {
+	
+        row1.data[i] = dat.data[i];
+	    row2.data[i] = dat.data[i+col_size];
+	    row3.data[i] = dat.data[i+ col_size*2];
+	    row4.data[i]= dat.data[i+ col_size*3];
+    }
 		
-
-		for(int j=0; j<96;j++)
-		{
-			//std::cout<< "........................................................................"<<std::endl;
-			for(int i = 0; i<4;i++)
-			{		
-				sum_overall_x[j] += overall[i][j];
-
-			}
-			
-			avg_overall_x[j] = sum_overall_x[j]/4; 
-
-		}
-
-
-
-		for(int i=0;i<96;i++)
-		{
-			tan_allavg_x.data[i] = avg_overall_x[i];
-
-		}
-
-		horizontal_angle.header.stamp =  ros::Time::now();
-		for(int i=0;i<96;i++)
-		{
-			horizontal_angle.data[i] = HA_plot[i];
-		}
-			
-
-		tan_allavg_x.header.stamp = ros::Time::now();
-		all_toflow.publish(tan_allavg_x);
-
-		horizontal_angle.header.stamp =  ros::Time::now();
-		horiz_ang.publish(horizontal_angle);
-
-		dat.header.stamp =  ros::Time::now();
-		allof.publish(dat);
-
-		row1.header.stamp = ros::Time::now();
-		rows1.publish(row1);
-
-		row2.header.stamp = ros::Time::now();
-		rows2.publish(row2);
-
-		row3.header.stamp = ros::Time::now();
-		rows3.publish(row3);
-
-		row4.header.stamp = ros::Time::now();
-		rows4.publish(row4);
-
-
-	}
-
-	void controller()
+	//average the optic flow column wise
+	for(int j=0; j<col_size;j++)
 	{
-		
-		msg.a.clear();
-		msg.a.resize(5);
-		
-		msg.b.clear();
-		msg.b.resize(5);
+		//std::cout<< "........................................................................"<<std::endl;
+		for(int i = 0; i<row_size;i++)
+		{		
+		    sum_overall_x[j] += overall[i][j];
 
-		int num_horiz_of = 96; 
-		int num_horiz_fourier_terms = 2;
-		float horiz_scan_limit = M_PI;
+		}
+		avg_overall_x[j] = sum_overall_x[j]/row_size; 
+    }
+
+
+
+	for(int i=0;i<col_size;i++)
+	{
+	    tan_allavg_x.data[i] = avg_overall_x[i];
+    }
 
 	
-		float h_a[5], h_b[5];
-		float h_dg = 0;
-		float h_dg_pi = 0;
-		float horiz_cos_gamma_arr[ num_horiz_fourier_terms + 1][num_horiz_of];
-		float horiz_sin_gamma_arr[ num_horiz_fourier_terms + 1][num_horiz_of];
+	tan_allavg_x.header.stamp = ros::Time::now();
+	all_toflow.publish(tan_allavg_x);
 
-		h_dg = (2*horiz_scan_limit)/num_horiz_of;
+	dat.header.stamp =  ros::Time::now();
+	allof.publish(dat);
 
-		//h_dg_pi = 2/num_horiz_of;
+	row1.header.stamp = ros::Time::now();
+	rows1.publish(row1);
 
+	row2.header.stamp = ros::Time::now();
+	rows2.publish(row2);
 
-		cv::Mat h_cos_gamma_matcv(num_horiz_fourier_terms + 1, num_horiz_of, CV_32FC1, horiz_cos_gamma_arr);
-		cv::Mat h_sin_gamma_matcv(num_horiz_fourier_terms + 1,  num_horiz_of , CV_32FC1, horiz_sin_gamma_arr);
-		cv::Mat average_of(1,96,CV_32FC1, avg_overall_x);
+	row3.header.stamp = ros::Time::now();
+	rows3.publish(row3);
 
+	row4.header.stamp = ros::Time::now();
+	rows4.publish(row4);
+
+}
+
+//calculate fourier coefficients
+void TanOflow::fourier_coeffec(){
 		
+	float avg_ov_x[col_size];	
+	msg.a.clear();
+	msg.a.resize(5);
+		
+	msg.b.clear();
+	msg.b.resize(5);
+
+	float horiz_cos_gamma_arr[ num_horiz_fourier_terms + 1][num_horiz_of];
+	float horiz_sin_gamma_arr[ num_horiz_fourier_terms + 1][num_horiz_of]; 
+	
+	for(int i=0;i<col_size;i++)
+	{
+		avg_ov_x[i] = tan_allavg_x.data[i];
+	}
+
+	h_dg = (2*horiz_scan_limit)/num_horiz_of;
+
+	//h_dg_pi = 2/num_horiz_of;
+
+
+	cv::Mat h_cos_gamma_matcv(num_horiz_fourier_terms + 1, num_horiz_of, CV_32FC1, horiz_cos_gamma_arr);
+	cv::Mat h_sin_gamma_matcv(num_horiz_fourier_terms + 1, num_horiz_of , CV_32FC1, horiz_sin_gamma_arr);
+	cv::Mat average_of(1,num_horiz_of,CV_32FC1, avg_ov_x);
+	
+	//a1: orienatation
+	//a2:lateral dispacement
+	//b1:forward speed
+
+	if(num_horiz_of == 96)//Horridge
+	{	
 		for(int i=0; i< num_horiz_fourier_terms+1; i++)
 		{
 			for(int j=0; j< num_horiz_of; j++)
 			{
-				horiz_cos_gamma_arr[i][j] = cos( i*HA_plot[j]/360*2*M_PI);
-				horiz_sin_gamma_arr[i][j] = sin( i*HA_plot[j]/360*2*M_PI);
+				horiz_cos_gamma_arr[i][j] = cos( i*HA_HT[j]/360*2*M_PI);
+				horiz_sin_gamma_arr[i][j] = sin( i*HA_HT[j]/360*2*M_PI);
 			}	
-				
+					
 			h_a[i] = average_of.dot(h_cos_gamma_matcv.row(i)) * h_dg / M_PI;
 			h_b[i] = average_of.dot(h_sin_gamma_matcv.row(i)) * h_dg / M_PI;				
-		
+			
 		}
+	}
 
-		std::vector<float> h_a_vector(h_a, h_a + sizeof h_a / sizeof h_a[0]);
-		std::vector<float> h_b_vector(h_b, h_b + sizeof h_b / sizeof h_b[0]);
-
-		
-
-		
-		msg.a = h_a_vector;
-		msg.b = h_b_vector;
-		
-		msg.header.stamp = ros::Time::now();
-		fourier_coeffs.publish(msg);
-
-
+	else if(num_horiz_of == 20)//Lucas Kanade
+	{	
+		for(int i=0; i< num_horiz_fourier_terms+1; i++)
+		{
+			for(int j=0; j< num_horiz_of; j++)
+			{
+				horiz_cos_gamma_arr[i][j] = cos( i*HA_LK[j]/360*2*M_PI);
+				horiz_sin_gamma_arr[i][j] = sin( i*HA_LK[j]/360*2*M_PI);
+			}	
+					
+			h_a[i] = average_of.dot(h_cos_gamma_matcv.row(i)) * h_dg / M_PI;
+			h_b[i] = average_of.dot(h_sin_gamma_matcv.row(i)) * h_dg / M_PI;				
+			
+		}
 	}
 
 
+	std::vector<float> h_a_vector(h_a, h_a + sizeof h_a / sizeof h_a[0]);
+	std::vector<float> h_b_vector(h_b, h_b + sizeof h_b / sizeof h_b[0]);
 
-private:
-	
-	ros::NodeHandle n;
+		
+	msg.a = h_a_vector;
+	msg.b = h_b_vector;
+		
+	msg.header.stamp = ros::Time::now();
+	fourier_coeffs.publish(msg);
 
-	ros::Publisher front_pub;
-	ros::Publisher right_pub;
-	ros::Publisher left_pub;
-	ros::Publisher back_pub;
-	
-	ros::Publisher all_toflow;
-	ros::Publisher horiz_ang;
-	ros::Publisher allof;
-	ros::Publisher rows1;
-	ros::Publisher rows2;
-	ros::Publisher rows3;
-	ros::Publisher rows4;
+}
 
-	ros::Publisher fourier_coeffs;	
 
-	ros::Subscriber front_sub;
-	ros::Subscriber right_sub;
-	ros::Subscriber left_sub;
-	ros::Subscriber back_sub;
-	ros::Subscriber laser_sub;
+void TanOflow::computeRobotTurnRate(){
 
-	teensy_centeye::FloatArray_of tan_front;
-	teensy_centeye::FloatArray_of tan_right;
-	teensy_centeye::FloatArray_of tan_left;
-	teensy_centeye::FloatArray_of tan_back;
-
-	teensy_centeye::FloatArray_of tan_allavg_x;
-	teensy_centeye::FloatArray_of horizontal_angle;
-	teensy_centeye::FloatArray_of dat;
-	teensy_centeye::FloatArray_of row1;
-	teensy_centeye::FloatArray_of row2;
-	teensy_centeye::FloatArray_of row3;
-	teensy_centeye::FloatArray_of row4;
-	float avg_overall_x[96] = {};
-	teensy_centeye::Fourier_Coeff msg;
-
-};
+	turn_rate = gain_k1 * h_a[1] + gain_k2 * h_a[2];
+	ROS_INFO("Turn : %f", turn_rate);
+}
 
 
 int main(int argc, char **argv)
