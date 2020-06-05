@@ -125,8 +125,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
+ include
+ ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -217,7 +217,7 @@ add_executable(teensy_centeye_oflow src/teensy_centeye_oflow.cpp)
 target_link_libraries(teensy_centeye_oflow ${catkin_LIBRARIES} ${OpenCV_LIBS})
 add_dependencies(teensy_centeye_oflow ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 
-add_executable(horridge_vis src/horridge_vis.cpp)
+add_executable(horridge_vis src/HT_1X_2D_vis.cpp)
 target_link_libraries(horridge_vis ${catkin_LIBRARIES})
 
 add_executable(LK_vis src/LK_vis.cpp)

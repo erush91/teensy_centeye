@@ -1,0 +1,30 @@
+<launch>
+
+	<node pkg="tf" type="static_transform_publisher" name="base2centeye" args="0 0 0 -1.57079632679 0 -1.57079632679  /base_link /centeye  100"/>
+
+        <arg name="SENSOR_CONFIG_HT_1X" default="1" />
+        <arg name="SENSOR_CONFIG_LK_1X" default="0" />
+        <arg name="SENSOR_CONFIG_HT_4X" default="0" />
+        <arg name="SENSOR_CONFIG_LK_4X" default="0" />
+
+        <node name="rosserial_arduino" type="serial_node.py" pkg="rosserial_arduino">
+                <param name="port" type="string" value="/dev/ttyACM0"/>
+                <param name="baud" type="int" value="115200"/>
+        </node>
+
+	<group if="$(arg SENSOR_CONFIG_HT_1X)">
+	
+		<!-- VISUALIZER -->
+        	<node name="horridge_vis" type="horridge_vis" pkg="teensy_centeye" output="screen" />
+  		<node type="rviz" name="rviz" pkg="rviz" args="-d $(find teensy_centeye)/rviz/HT_1X_2D.rviz" />
+
+	</group>
+
+		<!-- CONTROLLER -->
+        	<node name="teensy_centeye_oflow" type="teensy_centeye_oflow" pkg="teensy_centeye" output="screen">
+                	<param name="orientation_gain" type="double" value="1.0"/>
+                	<param name="lateral_gain" type="double" value="1.0"/>
+        	</node>
+
+</launch>
+

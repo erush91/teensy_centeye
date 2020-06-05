@@ -1,5 +1,4 @@
-#include "/home/ghokulji/workspace_ud/src/teensy_centeye/include/oflow.h"
-
+#include "oflow.h"
 
 TanOflow::TanOflow(){
 	front_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_front",10);

@@ -372,7 +372,7 @@ void callback(const std_msgs::Float32MultiArray::ConstPtr & msg)
   for ( int k = 0; k<120; k++)
   {
         visualization_msgs::Marker ma;
-	ma.header.frame_id = "/my_frame";
+	ma.header.frame_id = "/centeye";
 	ma.header.stamp = ros::Time::now();
 	ma.ns = "Arrows";
 	ma.id = 1 + k;
@@ -396,7 +396,9 @@ void callback(const std_msgs::Float32MultiArray::ConstPtr & msg)
 	of_x = msg->data[i] / 5;
 	of_y = msg->data[j] / 5;
 	mag = sqrt(of_x * of_x + of_y * of_y);
-	cout << mag << "    ";
+	
+	// PRINT OPTIC FLOW MAGNITUDE (DEBUGGING)
+	// cout << mag << "    ";
 
 	// Limit magnitude to 10
 	if (mag > 10)
@@ -405,10 +407,10 @@ void callback(const std_msgs::Float32MultiArray::ConstPtr & msg)
 	    of_y = of_y * 10 / mag;
 	}
 
-        q.x = HAdegree[k];
+        q.x = - HAdegree[k];
         q.y = VAdegree[k];
         q.z = 0.0;
-        p.x = HAdegree[k] + of_x;
+        p.x = - HAdegree[k] + of_x;
         p.y = VAdegree[k] + of_y;
         p.z = 0.0;
 
