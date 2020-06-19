@@ -478,10 +478,10 @@ public:
 	TanOflow();
 
 	void init(int of_size);
-    void oflow_front(const std_msgs::Float32MultiArray& ofront);
-	void oflow_right(const std_msgs::Float32MultiArray& oright);
-	void oflow_left(const std_msgs::Float32MultiArray& oleft);
-	void oflow_back(const std_msgs::Float32MultiArray& oback);
+    void oflow_front(const std_msgs::Int32MultiArray& ofront);
+	void oflow_right(const std_msgs::Int32MultiArray& oright);
+	void oflow_left(const std_msgs::Int32MultiArray& oleft);
+	void oflow_back(const std_msgs::Int32MultiArray& oback);
 
     void average();
     void fourier_coeffec();
