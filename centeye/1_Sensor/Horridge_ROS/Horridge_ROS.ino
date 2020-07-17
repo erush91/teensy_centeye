@@ -3,7 +3,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 
-//#define HWSERIAL Serial4
+#define HWSERIAL Serial2
 
 std_msgs::Float32MultiArray optic_flow_msg;
 ros::Publisher pub_optic_flow("optic_flow", &optic_flow_msg);
@@ -14,7 +14,7 @@ void setup()
 {
   
     Serial.begin(115200);
-    Serial4.begin(115200, SERIAL_8N1);
+    HWSERIAL.begin(115200, SERIAL_8N1);
     
     //start the ROS node
     nh.getHardware()->setBaud(115200);
@@ -46,16 +46,16 @@ void loop()
   unsigned char Data[246];
 
   start_time = micros();
-  Serial4.write(TxMsg, 6);
+  HWSERIAL.write(TxMsg, 6);
 
   
 
   // Buffer of UART probably small, this makes sure buffer has some bytes
   delay(1); // Need 3ms delay before reading Device ID (otherwise first byte = 252)
   
-  while(Serial4.available() && bytecount < 246)
+  while(HWSERIAL.available() && bytecount < 246)
   {
-    RxMsg = Serial4.read();
+    RxMsg = HWSERIAL.read();
     // Serial.print(RxMsg);
     // Serial.print(", ");
     Data[bytecount] = RxMsg;
@@ -75,7 +75,7 @@ void loop()
   // If Serial.clear() is NOT COMMENTED OUT, CAUSES ROS RUNTIME ERROR:
   // Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
   
-  Serial4.clear();
+  HWSERIAL.clear();
 
   /////////////////////////////
   // ASSIGN DATA TO POINTERS //
