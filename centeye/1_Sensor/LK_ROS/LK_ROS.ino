@@ -27,7 +27,7 @@ template <typename T> int sign(T val) {
 // Serial1: RX1 / TX1
 
 // set this to the hardware serial port you wish to use
-#define HWSERIAL Serial2
+#define HWSERIAL Serial4
 
 //these objects are used to set up a publisher/subscriber ros node
 // std_msgs::Float32 temp_msg;

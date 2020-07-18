@@ -8,15 +8,6 @@
         <arg name="SENSOR_CONFIG_LK_4X" default="1" />
         <arg name="LIVE_DATA" default="1" />
 
-        <!-- START SENSOR -->
-        <group if="$(arg LIVE_DATA)">
-
-        <node name="rosserial_arduino" type="serial_node.py" pkg="rosserial_arduino">
-                <param name="port" type="string" value="/dev/ttyACM0"/>
-                <param name="baud" type="int" value="115200"/>
-        </node>
-        </group>
-
         <group if="$(arg SENSOR_CONFIG_LK_1X)">
                 <!-- VISUALIZER -->
                 <node name="LK_1X_2D_vis" type="LK_1X_2D_vis" pkg="teensy_centeye" output="screen" />

@@ -3,7 +3,7 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 
-#define HWSERIAL Serial2
+#define HWSERIAL Serial4
 
 std_msgs::Float32MultiArray optic_flow_msg;
 ros::Publisher pub_optic_flow("optic_flow", &optic_flow_msg);

@@ -31,7 +31,7 @@ TanOflow::TanOflow(){
 
 
 //Front Optic Flow
-void TanOflow::oflow_front(const std_msgs::Int32MultiArray& ofront){
+void TanOflow::oflow_front(const std_msgs::Float32MultiArray& ofront){
 	
    
     //determine size of optic flow message
@@ -82,7 +82,7 @@ void TanOflow::oflow_front(const std_msgs::Int32MultiArray& ofront){
 }
 
 //Right Optic Flow
-void TanOflow::oflow_right(const std_msgs::Int32MultiArray& oright){
+void TanOflow::oflow_right(const std_msgs::Float32MultiArray& oright){
 
     if(oflow_size == 48)
     {
@@ -124,7 +124,7 @@ void TanOflow::oflow_right(const std_msgs::Int32MultiArray& oright){
 }
 
 //Left Optic Flow
-void TanOflow::oflow_left(const std_msgs::Int32MultiArray& oleft){
+void TanOflow::oflow_left(const std_msgs::Float32MultiArray& oleft){
 	
      if(oflow_size == 48)
     {
@@ -166,7 +166,7 @@ void TanOflow::oflow_left(const std_msgs::Int32MultiArray& oleft){
 }
 
 //Back Optic Flow
-void TanOflow::oflow_back(const std_msgs::Int32MultiArray& oback)	{
+void TanOflow::oflow_back(const std_msgs::Float32MultiArray& oback)	{
 
     if(oflow_size == 48)
     {
