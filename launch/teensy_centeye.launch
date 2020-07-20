@@ -10,11 +10,10 @@
 
         <!-- START SENSOR -->
         <group if="$(arg LIVE_DATA)">
-
-        <node name="rosserial_arduino" type="serial_node.py" pkg="rosserial_arduino">
-                <param name="port" type="string" value="/dev/ttyACM0"/>
-                <param name="baud" type="int" value="115200"/>
-        </node>
+                <node name="rosserial_arduino" type="serial_node.py" pkg="rosserial_arduino">
+                        <param name="port" type="string" value="/dev/ttyACM0"/>
+                        <param name="baud" type="int" value="115200"/>
+                </node>
         </group>
 
         <group if="$(arg SENSOR_CONFIG_LK_1X)">
