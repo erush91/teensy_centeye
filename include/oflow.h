@@ -457,23 +457,15 @@ public:
 	int	overall_middle_end;
 	int	overall_last_end;
 
-	
-
-	//Fourier Coefficients
+	// Fourier Coefficients
 	float turn_rate, gain_k2, gain_k1;
 	int	num_horiz_of;
 	int num_horiz_fourier_terms = 2;
 	float horiz_scan_limit = M_PI;
-
 	
 	float h_a[5], h_b[5];
 	float h_dg = 0;
 	float h_dg_pi = 0;
-	
-
-
-
-
 
 	TanOflow();
 
@@ -505,7 +497,7 @@ private:
 	ros::Publisher rows3;
 	ros::Publisher rows4;
 
-	ros::Publisher fourier_coeffs;	
+	ros::Publisher fourier_coeffs;
 
 	ros::Subscriber front_sub;
 	ros::Subscriber right_sub;
@@ -526,6 +518,9 @@ private:
 	teensy_centeye::FloatArray_of row3;
 	teensy_centeye::FloatArray_of row4;
 	teensy_centeye::Fourier_Coeff msg;
+
+	bool flag_LK;
+	bool flag_HT;
 
 };
 #endif

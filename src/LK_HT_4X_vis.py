@@ -225,12 +225,19 @@ try:
             #plt.hold(False)
             plt.grid()
             plt.xlim([0, 360])
-            plt.ylim([-200, 200])
-            plt.draw()
-            plt.xlabel('Viewing Angle [degrees]')
-            plt.ylabel('Magnitude')
-            plt.title('Tangential Optic Flow ')
-            plt.pause(0.05)
+
+        if col_size == 20:
+            plt.ylim([-0.25, 0.25])
+        elif col_size == 96:
+            plt.ylim([-100, 100])
+            
+        # plt.ylim([-100, 100])
+        plt.draw()
+        plt.xlabel('Viewing Angle [degrees]')
+        plt.ylabel('Magnitude')
+        plt.title('Tangential Optic Flow ')
+        plt.pause(0.05)
+
     plt.show()
 
 except KeyboardInterrupt:

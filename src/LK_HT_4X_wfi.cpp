@@ -6,9 +6,7 @@ TanOflow::TanOflow(){
 	left_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_left",10);
 	back_pub = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_back",10);
 		
-
 	all_toflow = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all_averaged", 10);
-	
 	
 	allof = n.advertise<teensy_centeye::FloatArray_of>("tang_oflow_all", 10);
 	rows1 = n.advertise<teensy_centeye::FloatArray_of>("row1",10);
@@ -18,10 +16,36 @@ TanOflow::TanOflow(){
 
 	fourier_coeffs = n.advertise<teensy_centeye::Fourier_Coeff>("/Fourier_Coeffs",10);
 
-	front_sub = n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
-	right_sub = n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
-	left_sub = n.subscribe("optic_flow_left", 10, &TanOflow::oflow_left, this);
-	back_sub = n.subscribe("optic_flow_back", 10, &TanOflow::oflow_back, this);
+	// Wait for first message to be published, determine format of incoming data
+	boost::shared_ptr<std_msgs::Float32MultiArray const> init_optic_flow_in;
+	std_msgs::Float32MultiArray init_optic_flow_in_pointer;
+	init_optic_flow_in = ros::topic::waitForMessage<std_msgs::Float32MultiArray>("optic_flow_left");
+	if(init_optic_flow_in != NULL)
+	{
+		//determine size of optic flow message
+		std::vector<int> oflow(std::begin(init_optic_flow_in->data), std::end(init_optic_flow_in->data));
+		oflow_size = oflow.size();
+		std::cout << "oflow_size: " << oflow_size << std::endl;
+		if(oflow_size == 48)
+		{
+			flag_LK = 1;
+		}
+		else if(oflow_size == 242)
+		{
+			flag_HT = 1;
+		}
+		else
+		{
+        	ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
+		}
+
+		init(oflow_size);
+	}
+
+	front_sub 	= n.subscribe("optic_flow_front", 10, &TanOflow::oflow_front, this);
+	right_sub 	= n.subscribe("optic_flow_right", 10, &TanOflow::oflow_right, this);
+	left_sub 	= n.subscribe("optic_flow_left",  10, &TanOflow::oflow_left,  this);
+	back_sub 	= n.subscribe("optic_flow_back",  10, &TanOflow::oflow_back,  this);
 
 	//steering control parameters
 	n.getParam("/orientation_gain",gain_k1);
@@ -32,16 +56,11 @@ TanOflow::TanOflow(){
 
 //Front Optic Flow
 void TanOflow::oflow_front(const std_msgs::Float32MultiArray& ofront){
-	
-   
-    //determine size of optic flow message
-	std::vector<int> v(std::begin(ofront.data), std::end(ofront.data));
-	oflow_size = v.size();
-	ROS_INFO("Size of %d", oflow_size);
-	init(oflow_size);
+
+	std::cout << "begin callback_front" << std::endl;
 
 	//Lucas Kanade
-    if(oflow_size == 48)
+    if(flag_LK == 1)
     {   
 		
         tan_front.data.clear();	
@@ -58,7 +77,7 @@ void TanOflow::oflow_front(const std_msgs::Float32MultiArray& ofront){
     }
 
 	//Horridge Template
-    else if(oflow_size == 242)
+    else if(flag_HT == 1)
     {
         tan_front.data.clear();	
         tan_front.data.resize(oflow_size);
@@ -84,7 +103,8 @@ void TanOflow::oflow_front(const std_msgs::Float32MultiArray& ofront){
 //Right Optic Flow
 void TanOflow::oflow_right(const std_msgs::Float32MultiArray& oright){
 
-    if(oflow_size == 48)
+	std::cout << "begin callback_right" << std::endl;
+    if(flag_LK == 1)
     {
         tan_right.data.clear();	
         tan_right.data.resize(oflow_size);
@@ -99,7 +119,7 @@ void TanOflow::oflow_right(const std_msgs::Float32MultiArray& oright){
         right_pub.publish(tan_right);
     }
 
-    else if(oflow_size == 242)
+    else if(flag_HT == 1)
     {
         tan_right.data.clear();	
         tan_right.data.resize(oflow_size);
@@ -118,15 +138,19 @@ void TanOflow::oflow_right(const std_msgs::Float32MultiArray& oright){
     {
         ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
     }
-
 	
+    average();	
+	fourier_coeffec();
+	computeRobotTurnRate();
 		
 }
 
 //Left Optic Flow
 void TanOflow::oflow_left(const std_msgs::Float32MultiArray& oleft){
-	
-     if(oflow_size == 48)
+
+	std::cout << "begin callback_left" << std::endl;
+
+     if(flag_LK == 1)
     {
         tan_left.data.clear();	
         tan_left.data.resize(oflow_size);
@@ -142,7 +166,7 @@ void TanOflow::oflow_left(const std_msgs::Float32MultiArray& oleft){
         left_pub.publish(tan_left);
     }
 
-    else if(oflow_size == 242)
+    else if(flag_HT == 1)
     {
         tan_left.data.clear();	
         tan_left.data.resize(oflow_size);
@@ -168,7 +192,9 @@ void TanOflow::oflow_left(const std_msgs::Float32MultiArray& oleft){
 //Back Optic Flow
 void TanOflow::oflow_back(const std_msgs::Float32MultiArray& oback)	{
 
-    if(oflow_size == 48)
+	std::cout << "begin callback_back" << std::endl;
+
+    if(flag_LK == 1)
     {
         tan_back.data.clear();	
         tan_back.data.resize(oflow_size);
@@ -183,7 +209,7 @@ void TanOflow::oflow_back(const std_msgs::Float32MultiArray& oback)	{
         back_pub.publish(tan_back);
     }
 
-    else if(oflow_size == 242)
+    else if(flag_HT == 1)
     {
         tan_back.data.clear();	
         tan_back.data.resize(oflow_size);
@@ -203,16 +229,13 @@ void TanOflow::oflow_back(const std_msgs::Float32MultiArray& oback)	{
         ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
     }
 	
-    average();	
-	fourier_coeffec();
-	computeRobotTurnRate();
 }
 
 //initialise the variables acccording to message size
 void TanOflow::init(int of_size){
 
 	//Lucas Kanade
-	if(oflow_size == 48)
+	if(flag_LK == 1)
     {
 		horiz_ang_lk = n.advertise<teensy_centeye::FloatArray_of>("horizontal_angle_lk",10);
 		horizontal_angle_lk.data.clear();
@@ -254,11 +277,10 @@ void TanOflow::init(int of_size){
 		horizontal_angle_lk.header.stamp =  ros::Time::now();
 		horiz_ang_lk.publish(horizontal_angle_lk);
 
-
     }
 
 	//Horridge Template
-    else if(oflow_size == 242)
+    else if(flag_HT == 1)
     {
 		horiz_ang_ht = n.advertise<teensy_centeye::FloatArray_of>("horizontal_angle_ht",10);
 		horizontal_angle_ht.data.clear();
@@ -306,7 +328,6 @@ void TanOflow::init(int of_size){
     {
         ROS_WARN_STREAM("Message size doesn't match neither LK(48) nor Horridge Template(242)");
     }
-
 
 }
 
