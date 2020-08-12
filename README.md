@@ -41,7 +41,7 @@ http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
 
 ### Modify ros.h
 
-- Do this in ~/Arduino/libraries/ros_lib/ArduinoHardware.h
+- Do this in ~/Arduino/libraries/ros_lib/ros.h
 
 ... from ...
 
@@ -66,5 +66,18 @@ http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
   typedef NodeHandle_<ArduinoHardware, 15, 15, 512, 1024> NodeHandle;
 #else
   typedef NodeHandle_<ArduinoHardware, 25, 25, 2048, 2048> NodeHandle;
+
+Note: make sure /home/xaru8145/Arduino/libraries/ros_lib/ArduinoHardware.h the correction:
+ 
+#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(__IMXRT1062__)
+
+### Make sure specified port for Teensy is correct.
+
+- Do this in tensy_centeye.launch
+
+<node name="rosserial_arduino" type="serial_node.py" pkg="rosserial_arduino">
+       <param name="port" type="string" value="/dev/ttyACM2"/>
+       <param name="baud" type="int" value="115200"/>
+</node>
 
 
