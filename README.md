@@ -18,6 +18,12 @@ Select the appropriate board
 - Tools --> Board --> Teensy 3.6
 - Tools --> Board --> Teensy 4.0
 
+### Install rosserial_arduino
+
+git clone https://github.com/ros-drivers/rosserial.git 
+- git checkout e5195cc
+- catkin_make
+
 ### Modify the Arduino library file to include the Teensy 4.0
 
 - https://github.com/ros-drivers/rosserial/issues/455
@@ -35,14 +41,14 @@ Select the appropriate board
 
 ### Make ros_lib libraries
 
-- cd /home/gene/Arduino/libraries
-- rosrun rosserial_arduino make_libraries.py /home/gene/Arduino/libraries
+- cd /home/$USER/Arduino/libraries
+- rosrun rosserial_arduino make_libraries.py /home/$USER/Arduino/libraries
 http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
 
 ### Modify ros.h
 
 - Do this in ~/Arduino/libraries/ros_lib/ros.h
-
+- might also want to do here /home/$USER/microbrain_ws/src/rosserial/rosserial_arduino/src/ros_lib/ros.h
 ... from ...
 
 #if defined(__AVR_ATmega8__) or defined(__AVR_ATmega168__)
@@ -67,7 +73,7 @@ http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
 #else
   typedef NodeHandle_<ArduinoHardware, 25, 25, 2048, 2048> NodeHandle;
 
-Note: make sure /home/xaru8145/Arduino/libraries/ros_lib/ArduinoHardware.h the correction:
+Note: make sure /home/$USER/Arduino/libraries/ros_lib/ArduinoHardware.h the correction:
  
 #if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__) || defined(__IMXRT1062__)
 
@@ -80,4 +86,30 @@ Note: make sure /home/xaru8145/Arduino/libraries/ros_lib/ArduinoHardware.h the c
        <param name="baud" type="int" value="115200"/>
 </node>
 
+### Very Important: Modify the 
 
+- /home/$USER/arduino-1.8.13-linux64/arduino-1.8.13/hardware/teensy/avr/cores/teensy4/HardwareSerial1.cpp
+- /home/$USER/arduino-1.8.13-linux64/arduino-1.8.13/hardware/teensy/avr/cores/teensy4/HardwareSerial2.cpp
+- /home/$USER/arduino-1.8.13-linux64/arduino-1.8.13/hardware/teensy/avr/cores/teensy4/HardwareSerial3.cpp
+- /home/$USER/arduino-1.8.13-linux64/arduino-1.8.13/hardware/teensy/avr/cores/teensy4/HardwareSerial4.cpp
+
+- see reference here: https://forum.pjrc.com/threads/43699-teensy-3-6-serial-TX-buffer-size
+- see reference here: https://forum.pjrc.com/threads/45379-Serial-buffer-size-increase-Teensy-3-2
+
+#ifndef SERIAL5_TX_BUFFER_SIZE
+#define SERIAL5_TX_BUFFER_SIZE     40 // number of outgoing bytes to buffer
+#endif
+#ifndef SERIAL5_RX_BUFFER_SIZE
+#define SERIAL5_RX_BUFFER_SIZE     64 // number of incoming bytes to buffer
+#endif
+
+#ifndef SERIAL5_TX_BUFFER_SIZE
+#define SERIAL5_TX_BUFFER_SIZE     2048 // number of outgoing bytes to buffer
+#endif
+#ifndef SERIAL5_RX_BUFFER_SIZE
+#define SERIAL5_RX_BUFFER_SIZE     2048 // number of incoming bytes to buffer
+#endif
+
+### Note
+
+Most recently installed with arduino-1.8.13-linux64 and Teensyduino 1.53 Linux Installer (X86 64 bit)
