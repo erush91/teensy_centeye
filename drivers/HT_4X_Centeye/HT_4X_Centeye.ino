@@ -204,6 +204,7 @@ void loop()
   // Window 1 - 24 = Classic V1
   // Window 25 - 120 = Small
   double begin2 = nh.now().toNsec();
+
   for(int i = 0; i < 121; i++)
   {
     CapQX1[i] =   Data1[4+2*i];
@@ -213,8 +214,17 @@ void loop()
     CapQX3[i] =   Data3[4+2*i];
     CapQY3[i] = - Data3[5+2*i];
     CapQX4[i] =   Data4[4+2*i];
-    CapQY4[i] = - Data4[5+2*i];
   }
+
+//  Serial.print(";");  
+//  for(int i = 0; i < 121; i++)
+//  {
+//    Serial.print(CapQX1[i]);
+//    Serial.print(",");
+//  }
+//  Serial.println(" ");
+
+
   double end2 = nh.now().toNsec();
 
   double begin3 = nh.now().toNsec();

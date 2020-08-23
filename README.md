@@ -21,7 +21,8 @@ Select the appropriate board
 ### Install rosserial_arduino
 
 git clone https://github.com/ros-drivers/rosserial.git 
-- git checkout e5195cc
+- git checkout melodic-devel
+- git pull origin melodic-devel
 - catkin_make
 
 ### Modify the Arduino library file to include the Teensy 4.0
@@ -86,7 +87,7 @@ Note: make sure /home/$USER/Arduino/libraries/ros_lib/ArduinoHardware.h the corr
        <param name="baud" type="int" value="115200"/>
 </node>
 
-### Very Important: Modify the 
+### Very Important: Modify the RX and TX buffer size in HardwareSerialX.cpp 
 
 - /home/$USER/arduino-1.8.13-linux64/arduino-1.8.13/hardware/teensy/avr/cores/teensy4/HardwareSerial1.cpp
 - /home/$USER/arduino-1.8.13-linux64/arduino-1.8.13/hardware/teensy/avr/cores/teensy4/HardwareSerial2.cpp

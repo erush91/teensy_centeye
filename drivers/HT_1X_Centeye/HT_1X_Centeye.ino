@@ -106,6 +106,14 @@ void loop()
     CapQY[i] = Data[5+2*i];
   }
   elapsed_time1 = micros() - start_time1;
+  
+  Serial.print(";");  
+  for(int i = 0; i < 121; i++)
+  {
+    Serial.print(CapQX[i]);
+    Serial.print(",");
+  }
+  Serial.println(" ");
 
   //delay(15);
   start_time2 = micros();

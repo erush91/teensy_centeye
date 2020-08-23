@@ -2,20 +2,20 @@
 
 	<node pkg="tf" type="static_transform_publisher" name="base2centeye" args="0 0 0 -1.57079632679 0 -1.57079632679  /base_link /centeye  100"/>
 
-  	<!-- Launch IMU filter -->
-<!--  	<include file="$(find imu_filter_madgwick)/launch/imu.launch" /> -->
-  	<!-- Launch Lidar-->
-<!--  	<include file="$(find rplidar_ros)/launch/rplidar_s1.launch" />
-
--->
         <arg name="SENSOR_CONFIG_HT_1X" default="0" />
         <arg name="SENSOR_CONFIG_LK_1X" default="0" />
         <arg name="SENSOR_CONFIG_HT_4X" default="1" />
         <arg name="SENSOR_CONFIG_LK_4X" default="0" />
         <arg name="LIVE_DATA" default="1" />
 
-        <!-- START SENSOR -->
         <group if="$(arg LIVE_DATA)">
+        	<!-- START IMU -->
+        	<include file="$(find imu_filter_madgwick)/launch/imu.launch" />
+
+        	<!-- START LIDAR-->
+        	<include file="$(find rplidar_ros)/launch/rplidar_s1.launch" />
+
+	        <!-- START OPTIC FLOW SENSORS -->
                 <node name="rosserial_arduino" type="serial_node.py" pkg="rosserial_arduino">
                         <param name="port" type="string" value="/dev/ttyACM0"/>
                         <param name="baud" type="int" value="115200"/>

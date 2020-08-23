@@ -204,13 +204,17 @@ try:
         elif col_size == 96:
             flag_plot_data = 1
             HA = HA_HT
-            
+       
+        for i in range(len(HA)):
+            if (HA[i] > 180):  
+                HA[i] -= 360;  
+
         if flag_plot_data == 1:
                 
             plt.cla()
             plt.clf()
             #To run just the optic flow avg with gamma ( comment lines 256-264 and uncomment 254)
-            plt.plot(HA, tanof_avg_NP, 'b-')
+            plt.plot(HA, tanof_avg_NP, 'b.')
             
             #To run optic flow avg, row 1,2,3,4 with gamma [line(256-264)]
             #plt.plot(HA, tanof_avg_NP ,'b-', HA, row1_NP,'r-', HA , row2_NP,'g-', HA , row3_NP,'m-', HA , row4_NP ,'y-')
@@ -224,12 +228,12 @@ try:
             
             #plt.hold(False)
             plt.grid()
-            plt.xlim([0, 360])
+            plt.xlim([-180, 180])
 
         if col_size == 20:
             plt.ylim([-0.25, 0.25])
         elif col_size == 96:
-            plt.ylim([-100, 100])
+            plt.ylim([-150, 150])
             
         # plt.ylim([-100, 100])
         plt.draw()
